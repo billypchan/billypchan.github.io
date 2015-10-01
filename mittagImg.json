@@ -1,7 +1,7 @@
 {
-  "bier": "http://billypchan.github.io/sampleImg/beer.jpeg",
-  "coca cola": "http://billypchan.github.io/sampleImg/cocacola.jpeg",
-  "tea": "http://billypchan.github.io/sampleImg/tea.jpeg",
-  "water": "http://billypchan.github.io/sampleImg/water.jpeg",
-  "juice": "http://billypchan.github.io/sampleImg/juice.jpeg"
+  "bier": "https://billypchan.github.io/sampleImg/beer.jpeg",
+  "coca cola": "https://billypchan.github.io/sampleImg/cocacola.jpeg",
+  "tea": "https://billypchan.github.io/sampleImg/tea.jpeg",
+  "water": "https://billypchan.github.io/sampleImg/water.jpeg",
+  "juice": "https://billypchan.github.io/sampleImg/juice.jpeg"
 }
