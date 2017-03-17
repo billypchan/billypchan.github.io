@@ -51,8 +51,6 @@ var Application = function() {
 
   this.videoEndedCallback_ = this.bind_(this, this.onContentEnded_);
   this.setVideoEndedCallbackEnabled(true);
-
-  this.onClick_();
 };
 
 Application.prototype.SAMPLE_AD_TAG_ = 'https://ima3vpaid.appspot.com/?adTagUrl=https%3A%2F%2Fgoogleads.g.doubleclick.net%2Fpagead%2Fads%3Fclient%3Dca-video-pub-1012583642465632%26slotname%3D9184928696%26ad_type%3Dvideo%26description_url%3Dhttp%253A%252F%252Fwww.quazer.com%26max_ad_duration%3D30000%26videoad_start_delay%3D0&type=js';
