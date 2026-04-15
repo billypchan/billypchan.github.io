@@ -1,7 +1,575 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transit Apps by Bill Chan</title>
+  <meta name="description" content="Apple Watch and iOS transit apps — YouBike Nearby for Taiwan, BB Timetable for Berlin & Brandenburg." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --surface: #f5f5f7;
+      --border: #d2d2d7;
+      --text: #1d1d1f;
+      --secondary: #6e6e73;
+      --accent-youbike: #28a745;
+      --accent-berlin: #0071e3;
+      --radius: 20px;
+      --max-w: 960px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 15px; font-weight: 600;
+      color: var(--text); text-decoration: none; letter-spacing: -0.2px;
+    }
+    .nav-right { display: flex; align-items: center; gap: 24px; }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a {
+      font-size: 14px; color: var(--secondary);
+      text-decoration: none; transition: color .15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Language switcher */
+    .lang-switcher { display: flex; gap: 4px; }
+    .lang-btn {
+      font-size: 12px; font-weight: 600;
+      padding: 4px 9px; border-radius: 20px; border: none;
+      background: transparent; color: var(--secondary);
+      cursor: pointer; transition: background .15s, color .15s;
+      letter-spacing: 0.03em;
+    }
+    .lang-btn.active,
+    .lang-btn:hover { background: var(--surface); color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 96px 24px 80px; text-align: center;
+    }
+    .hero-eyebrow {
+      font-size: 13px; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--secondary); margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: clamp(34px, 6vw, 60px); font-weight: 700;
+      letter-spacing: -.02em; line-height: 1.1;
+      color: var(--text); margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: clamp(17px, 2.5vw, 20px); color: var(--secondary);
+      max-width: 520px; margin: 0 auto; line-height: 1.55;
+    }
+
+    /* ── APP CARDS ── */
+    .apps {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 0 24px 100px;
+      display: flex; flex-direction: column; gap: 40px;
+    }
+
+    .app-card {
+      background: var(--surface); border-radius: var(--radius);
+      overflow: hidden; position: relative;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    }
+    .app-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .youbike::before { background: var(--accent-youbike); }
+    .berlin::before  { background: var(--accent-berlin); }
+
+    /* Left: content */
+    .card-content { padding: 48px 48px 44px; }
+
+    .app-header { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 28px; }
+    .app-icon {
+      width: 72px; height: 72px;
+      border-radius: 16px; flex-shrink: 0;
+      overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    }
+    .app-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .app-title-block { flex: 1; }
+    .app-name { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+    .app-subtitle { font-size: 14px; color: var(--secondary); margin-bottom: 12px; }
+    .platform-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      font-size: 11px; font-weight: 500;
+      padding: 3px 9px; border-radius: 20px;
+      background: rgba(0,0,0,.07); color: var(--secondary);
+    }
+
+    .app-prose {
+      font-size: 15px; line-height: 1.75; color: #3a3a3f;
+      white-space: pre-line; margin-bottom: 28px;
+    }
+
+    .features-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 36px;
+    }
+    .feature-item {
+      background: #fff; border-radius: 12px; padding: 14px 16px;
+    }
+    .feature-icon { font-size: 18px; margin-bottom: 6px; }
+    .feature-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .feature-desc { font-size: 12px; color: var(--secondary); line-height: 1.4; }
+
+    .card-footer { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .btn-store {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 20px; border-radius: 980px;
+      font-size: 13px; font-weight: 600;
+      text-decoration: none; color: #fff;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn-store:hover { opacity: .85; transform: scale(1.01); }
+    .youbike .btn-store { background: var(--accent-youbike); }
+    .berlin  .btn-store { background: var(--accent-berlin); }
+    .btn-store svg { width: 15px; height: 15px; fill: currentColor; flex-shrink: 0; }
+    .version-label { font-size: 12px; color: var(--secondary); }
+
+    /* Right: screenshots */
+    .card-screenshots {
+      background: linear-gradient(160deg, #e8e8ed 0%, #d8d8de 100%);
+      display: flex; align-items: flex-end; justify-content: center;
+      gap: 12px; padding: 32px 32px 0; overflow: hidden; min-height: 360px;
+    }
+    .youbike .card-screenshots { background: linear-gradient(160deg, #d4f0dc 0%, #b8e5c4 100%); }
+    .berlin  .card-screenshots { background: linear-gradient(160deg, #d0e8ff 0%, #b8d5f8 100%); }
+
+    .screenshot-frame {
+      width: 130px; flex-shrink: 0;
+      background: #111; border-radius: 22px;
+      box-shadow: 0 12px 32px rgba(0,0,0,.2);
+      overflow: hidden; border: 2px solid rgba(255,255,255,.3);
+      transform: translateY(0px); transition: transform .3s;
+    }
+    .screenshot-frame:hover { transform: translateY(-6px); }
+    .screenshot-frame img { width: 100%; display: block; }
+    .screenshot-frame.raised { transform: translateY(-24px); }
+    .screenshot-frame.raised:hover { transform: translateY(-30px); }
+
+    /* Berlin: just icon (no screenshots) */
+    .berlin-icon-showcase {
+      display: flex; align-items: center; justify-content: center;
+    }
+    .berlin-icon-large {
+      width: 140px; height: 140px; border-radius: 32px;
+      overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .berlin-icon-large img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── ABOUT ── */
+    .about {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .about-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 72px 24px; text-align: center;
+    }
+    .about h2 { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 14px; }
+    .about p {
+      font-size: 16px; color: var(--secondary);
+      max-width: 480px; margin: 0 auto 28px; line-height: 1.6;
+    }
+    .about-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .about-links a {
+      font-size: 14px; font-weight: 500; color: var(--accent-berlin);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: opacity .15s;
+    }
+    .about-links a:hover { opacity: .7; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px; text-align: center;
+    }
+    footer p { font-size: 13px; color: var(--secondary); }
+    footer a { color: inherit; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .app-card { grid-template-columns: 1fr; }
+      .card-screenshots { min-height: 200px; padding: 24px 24px 0; }
+      .screenshot-frame { width: 100px; border-radius: 18px; }
+      .screenshot-frame.raised { transform: translateY(-16px); }
+    }
+    @media (max-width: 600px) {
+      .card-content { padding: 32px 24px 28px; }
+      .app-card { border-radius: 16px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .hero { padding: 60px 24px 52px; }
+      .nav-links { display: none; }
+      .screenshot-frame { width: 88px; }
+    }
+  </style>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" data-i18n="nav.title">Transit Apps</a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        <li><a href="#youbike">YouBike</a></li>
+        <li><a href="#berlin">BB Timetable</a></li>
+        <li><a href="#about" data-i18n="nav.about">About</a></li>
+      </ul>
+      <div class="lang-switcher">
+        <button class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button class="lang-btn"        onclick="setLang('zh')">中文</button>
+        <button class="lang-btn"        onclick="setLang('de')">DE</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow" data-i18n="hero.eyebrow">Apple Watch &amp; iOS</p>
+  <h1 data-i18n="hero.title">Move through the city,<br>effortlessly.</h1>
+  <p data-i18n="hero.subtitle">Two apps. Two cities. Built for the wrist — and the pocket.</p>
+</section>
+
+<!-- APPS -->
+<div class="apps">
+
+  <!-- YouBike -->
+  <div class="app-card youbike" id="youbike">
+    <div class="card-content">
+      <div class="app-header">
+        <div class="app-icon">
+          <img src="assets/youbike-icon.png" alt="YouBike Nearby icon" />
+        </div>
+        <div class="app-title-block">
+          <div class="app-name" data-i18n="youbike.name">YouBike Nearby</div>
+          <div class="app-subtitle" data-i18n="youbike.subtitle">Discover &amp; Ride for YouBike</div>
+          <div class="platform-tags">
+            <span class="tag">Apple Watch</span>
+            <span class="tag">iPhone</span>
+            <span class="tag">Widgets</span>
+            <span class="tag" data-i18n="youbike.region">Taiwan</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-prose" data-i18n="youbike.prose"></div>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">⌚</div>
+          <div class="feature-name" data-i18n="youbike.f1.name">Apple Watch</div>
+          <div class="feature-desc" data-i18n="youbike.f1.desc">Station, distance, direction — raise your wrist.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🗺️</div>
+          <div class="feature-name" data-i18n="youbike.f2.name">Journey Planning</div>
+          <div class="feature-desc" data-i18n="youbike.f2.desc">Pickup, drop-off, every walking minute mapped.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📍</div>
+          <div class="feature-name" data-i18n="youbike.f3.name">Auto City Switching</div>
+          <div class="feature-desc" data-i18n="youbike.f3.desc">Taipei, New Taipei, Taoyuan, Taichung. You move, it follows.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📵</div>
+          <div class="feature-name" data-i18n="youbike.f4.name">Offline Data</div>
+          <div class="feature-desc" data-i18n="youbike.f4.desc">No signal. Still works.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🟢</div>
+          <div class="feature-name" data-i18n="youbike.f5.name">Color at a Glance</div>
+          <div class="feature-desc" data-i18n="youbike.f5.desc">Green is plenty. Red is gone. Know before you walk.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔖</div>
+          <div class="feature-name" data-i18n="youbike.f6.name">Bookmarks</div>
+          <div class="feature-desc" data-i18n="youbike.f6.desc">Favorite stops synced to Watch, phone, and widget.</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a class="btn-store" href="https://apps.apple.com/us/app/youbike%E5%9C%A8%E5%93%AA/id6477900867" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.19 1.28-2.17 3.82.03 3.02 2.65 4.03 2.68 4.04l-.06.26zm-8.35-16.5C11.23 1.6 13 .5 14.32.5c.05 1.36-.4 2.71-1.2 3.7-.78.97-2.01 1.72-3.26 1.62-.07-1.28.46-2.56 1.5-3.32z"/></svg>
+          <span data-i18n="cta.appstore">Download on the App Store</span>
+        </a>
+        <span class="version-label">v3.9</span>
+      </div>
+    </div>
+
+    <div class="card-screenshots">
+      <div class="screenshot-frame">
+        <img src="assets/youbike-stations.png" alt="YouBike station list" loading="lazy" />
+      </div>
+      <div class="screenshot-frame raised">
+        <img src="assets/youbike-map.png" alt="YouBike map view" loading="lazy" />
+      </div>
+      <div class="screenshot-frame">
+        <img src="assets/youbike-travel.png" alt="YouBike travel planning" loading="lazy" />
+      </div>
+    </div>
+  </div>
+
+  <!-- BerlinFahrplan -->
+  <div class="app-card berlin" id="berlin">
+    <div class="card-content">
+      <div class="app-header">
+        <div class="app-icon">
+          <img src="assets/berlin-icon.png" alt="BB Timetable icon" />
+        </div>
+        <div class="app-title-block">
+          <div class="app-name" data-i18n="berlin.name">BB Timetable</div>
+          <div class="app-subtitle" data-i18n="berlin.subtitle">Berlin &amp; Brandenburg Transit</div>
+          <div class="platform-tags">
+            <span class="tag">iPhone</span>
+            <span class="tag">Apple Watch</span>
+            <span class="tag">Mac</span>
+            <span class="tag">Live Activities</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-prose" data-i18n="berlin.prose"></div>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🚆</div>
+          <div class="feature-name" data-i18n="berlin.f1.name">Live Departures</div>
+          <div class="feature-desc" data-i18n="berlin.f1.desc">U-Bahn, S-Bahn, tram, bus, regional. Delays marked.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🧭</div>
+          <div class="feature-name" data-i18n="berlin.f2.name">Journey Planner</div>
+          <div class="feature-desc" data-i18n="berlin.f2.desc">Door to door. Reroutes from where you are.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🏝️</div>
+          <div class="feature-name" data-i18n="berlin.f3.name">Live Activities</div>
+          <div class="feature-desc" data-i18n="berlin.f3.desc">Lock screen and Dynamic Island — every step tracked.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⌚</div>
+          <div class="feature-name" data-i18n="berlin.f4.name">Apple Watch</div>
+          <div class="feature-desc" data-i18n="berlin.f4.desc">Nearby stops, departures, journey planning on your wrist.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⭐</div>
+          <div class="feature-name" data-i18n="berlin.f5.name">Favorites</div>
+          <div class="feature-desc" data-i18n="berlin.f5.desc">Your lines, your directions. Pinned to the top.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔔</div>
+          <div class="feature-name" data-i18n="berlin.f6.name">Smart Notifications</div>
+          <div class="feature-desc" data-i18n="berlin.f6.desc">Next stop, platform, transfer. AI summaries on iOS 26+.</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a class="btn-store" href="https://apps.apple.com/de/app/berlin-time-table/id6504204211" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.19 1.28-2.17 3.82.03 3.02 2.65 4.03 2.68 4.04l-.06.26zm-8.35-16.5C11.23 1.6 13 .5 14.32.5c.05 1.36-.4 2.71-1.2 3.7-.78.97-2.01 1.72-3.26 1.62-.07-1.28.46-2.56 1.5-3.32z"/></svg>
+          <span data-i18n="cta.appstore">Download on the App Store</span>
+        </a>
+        <span class="version-label">v4.9</span>
+      </div>
+    </div>
+
+    <div class="card-screenshots berlin-icon-showcase">
+      <div class="berlin-icon-large">
+        <img src="assets/berlin-icon.png" alt="BB Timetable" />
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <h2 data-i18n="about.title">Built by Bill Chan</h2>
+    <p data-i18n="about.body">Independent developer making transit on Apple Watch feel like it was always supposed to be there.</p>
+    <div class="about-links">
+      <a href="https://github.com/billypchan/" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        GitHub
+      </a>
+      <a href="mailto:billypchan@gmail.com">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <span data-i18n="about.contact">Contact</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Bill Chan · <a href="https://github.com/billypchan/">GitHub</a></p>
+</footer>
+
+<script>
+const i18n = {
+  en: {
+    "nav.title": "Transit Apps",
+    "nav.about": "About",
+    "hero.eyebrow": "Apple Watch & iOS",
+    "hero.title": "Move through the city,<br>effortlessly.",
+    "hero.subtitle": "Two apps. Two cities. Built for the wrist — and the pocket.",
+    "youbike.name": "YouBike Nearby",
+    "youbike.subtitle": "Discover & Ride for YouBike",
+    "youbike.region": "Taiwan",
+    "youbike.prose": "You stop at the corner.\nNot sure which way.\n\nThe watch glows — northeast, four hundred meters, bikes waiting.\n\nThat's how it starts.",
+    "youbike.f1.name": "Apple Watch", "youbike.f1.desc": "Station, distance, direction — raise your wrist.",
+    "youbike.f2.name": "Journey Planning", "youbike.f2.desc": "Pickup, drop-off, every walking minute mapped.",
+    "youbike.f3.name": "Auto City Switching", "youbike.f3.desc": "Taipei, New Taipei, Taoyuan, Taichung. You move, it follows.",
+    "youbike.f4.name": "Offline Data", "youbike.f4.desc": "No signal. Still works.",
+    "youbike.f5.name": "Color at a Glance", "youbike.f5.desc": "Green is plenty. Red is gone. Know before you walk.",
+    "youbike.f6.name": "Bookmarks", "youbike.f6.desc": "Favorite stops synced to Watch, phone, and widget.",
+    "berlin.name": "BB Timetable",
+    "berlin.subtitle": "Berlin & Brandenburg Transit",
+    "berlin.prose": "The board says two minutes.\nThen one.\nThen the doors close.\n\nWrist up — same line, same platform, already there.\n\nThat's how it starts.",
+    "berlin.f1.name": "Live Departures", "berlin.f1.desc": "U-Bahn, S-Bahn, tram, bus, regional. Delays marked.",
+    "berlin.f2.name": "Journey Planner", "berlin.f2.desc": "Door to door. Reroutes from where you are.",
+    "berlin.f3.name": "Live Activities", "berlin.f3.desc": "Lock screen and Dynamic Island — every step tracked.",
+    "berlin.f4.name": "Apple Watch", "berlin.f4.desc": "Nearby stops, departures, journey planning on your wrist.",
+    "berlin.f5.name": "Favorites", "berlin.f5.desc": "Your lines, your directions. Pinned to the top.",
+    "berlin.f6.name": "Smart Notifications", "berlin.f6.desc": "Next stop, platform, transfer. AI summaries on iOS 26+.",
+    "cta.appstore": "Download on the App Store",
+    "about.title": "Built by Bill Chan",
+    "about.body": "Independent developer making transit on Apple Watch feel like it was always supposed to be there.",
+    "about.contact": "Contact",
+  },
+
+  zh: {
+    "nav.title": "交通 Apps",
+    "nav.about": "關於",
+    "hero.eyebrow": "Apple Watch 與 iOS",
+    "hero.title": "穿越城市，<br>從容不迫。",
+    "hero.subtitle": "兩款 App，兩座城市。為手腕而生，也為口袋而設。",
+    "youbike.name": "YouBike在哪",
+    "youbike.subtitle": "發現、定位、騎行：您的 YouBike 必備助手",
+    "youbike.region": "台灣",
+    "youbike.prose": "你停在路口，\n不確定往哪走。\n\n手錶亮了——\n右前方，四百公尺，有車在等。\n\n就是這樣開始的。",
+    "youbike.f1.name": "Apple Watch", "youbike.f1.desc": "站點、距離、方向——抬腕即看。",
+    "youbike.f2.name": "旅程規劃", "youbike.f2.desc": "找最近的接駁站，算好每一段步行時間。",
+    "youbike.f3.name": "自動切換城市", "youbike.f3.desc": "台北、新北、桃園、台中。你走到哪，它跟到哪。",
+    "youbike.f4.name": "離線資料", "youbike.f4.desc": "沒有網路，一樣可用。",
+    "youbike.f5.name": "顏色即資訊", "youbike.f5.desc": "綠色：充足。紅色：沒車。不用走過去才知道。",
+    "youbike.f6.name": "書籤", "youbike.f6.desc": "常去的站，iPhone、Apple Watch、小工具同步。",
+    "berlin.name": "BB Fahrplan",
+    "berlin.subtitle": "柏林與布蘭登堡大眾運輸",
+    "berlin.prose": "看板顯示兩分鐘。\n接著一分鐘。\n門就關上了。\n\n抬起手腕——\n同一條線，同一個月台，\n早就知道了。",
+    "berlin.f1.name": "即時班次", "berlin.f1.desc": "地鐵、城鐵、電車、公車、區域列車，延誤一目了然。",
+    "berlin.f2.name": "行程規劃", "berlin.f2.desc": "點對點導航，從你現在的位置重新規劃路線。",
+    "berlin.f3.name": "即時動態", "berlin.f3.desc": "鎖定畫面與靈動島，每一段旅程都掌握在手。",
+    "berlin.f4.name": "Apple Watch", "berlin.f4.desc": "附近站點、班次、旅程規劃——抬腕即看。",
+    "berlin.f5.name": "最愛路線", "berlin.f5.desc": "你的線路與方向，釘在最上方。",
+    "berlin.f6.name": "智慧通知", "berlin.f6.desc": "下一站、月台、換車資訊，iOS 26 支援 AI 摘要。",
+    "cta.appstore": "在 App Store 下載",
+    "about.title": "開發者：Bill Chan",
+    "about.body": "獨立開發者，致力於讓 Apple Watch 上的交通體驗，回歸它本來應有的樣子。",
+    "about.contact": "聯絡我",
+  },
+
+  de: {
+    "nav.title": "Transit Apps",
+    "nav.about": "Über",
+    "hero.eyebrow": "Apple Watch & iOS",
+    "hero.title": "Durch die Stadt,<br>ganz entspannt.",
+    "hero.subtitle": "Zwei Apps. Zwei Städte. Für das Handgelenk — und die Hosentasche.",
+    "youbike.name": "YouBike Nearby",
+    "youbike.subtitle": "Entdecken & Fahren mit YouBike",
+    "youbike.region": "Taiwan",
+    "youbike.prose": "Du stehst an der Ecke.\nNicht sicher, welchen Weg.\n\nDie Uhr leuchtet auf — Nordost, vierhundert Meter, Fahrräder warten.\n\nSo fängt es an.",
+    "youbike.f1.name": "Apple Watch", "youbike.f1.desc": "Station, Entfernung, Richtung — Handgelenk hoch.",
+    "youbike.f2.name": "Routenplanung", "youbike.f2.desc": "Abholstation, Rückgabestation, jede Gehminute eingezeichnet.",
+    "youbike.f3.name": "Auto-Stadtwechsel", "youbike.f3.desc": "Taipei, New Taipei, Taoyuan, Taichung. Du bewegst dich, es folgt.",
+    "youbike.f4.name": "Offline-Daten", "youbike.f4.desc": "Kein Signal. Funktioniert trotzdem.",
+    "youbike.f5.name": "Farbe auf einen Blick", "youbike.f5.desc": "Grün ist reichlich. Rot ist leer. Weißt du, bevor du losgehst.",
+    "youbike.f6.name": "Lesezeichen", "youbike.f6.desc": "Lieblingsstationen auf Uhr, iPhone und Widget synchronisiert.",
+    "berlin.name": "BB Fahrplan",
+    "berlin.subtitle": "Berlin & Brandenburg Verkehr",
+    "berlin.prose": "Zwei Minuten, steht da.\nDann eine.\nDann fahren die Türen zu.\n\nHandgelenk hoch —\ndieselbe Linie, derselber Bahnsteig,\nschon vorher gewusst.\n\nSo fängt es an.",
+    "berlin.f1.name": "Live-Abfahrten", "berlin.f1.desc": "U-Bahn, S-Bahn, Tram, Bus, Regionalbahn. Verspätungen markiert.",
+    "berlin.f2.name": "Reiseplaner", "berlin.f2.desc": "Von Tür zu Tür. Neue Route ab deinem Standort.",
+    "berlin.f3.name": "Live Activities", "berlin.f3.desc": "Sperrbildschirm & Dynamic Island — jeden Schritt verfolgt.",
+    "berlin.f4.name": "Apple Watch", "berlin.f4.desc": "Nahe Haltestellen, Abfahrten, Reiseplanung am Handgelenk.",
+    "berlin.f5.name": "Favoriten", "berlin.f5.desc": "Deine Linien und Richtungen. Oben angepinnt.",
+    "berlin.f6.name": "Smarte Benachrichtigungen", "berlin.f6.desc": "Nächste Haltestelle, Bahnsteig, Anschluss. KI-Zusammenfassung ab iOS 26.",
+    "cta.appstore": "Im App Store laden",
+    "about.title": "Entwickelt von Bill Chan",
+    "about.body": "Unabhängiger Entwickler — macht Transit auf der Apple Watch so, wie es sich immer angefühlt haben sollte.",
+    "about.contact": "Kontakt",
+  }
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  const dict = i18n[lang];
+
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) {
+      el.innerHTML = dict[key];
+    }
+  });
+
+  // Update <html lang>
+  document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang;
+
+  // Update active button
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.trim() === langLabel(lang));
+  });
+}
+
+function langLabel(lang) {
+  return { en: 'EN', zh: '中文', de: 'DE' }[lang];
+}
+
+// Auto-detect browser language on load
+(function() {
+  const browserLang = (navigator.language || 'en').toLowerCase();
+  let initial = 'en';
+  if (browserLang.startsWith('zh')) initial = 'zh';
+  else if (browserLang.startsWith('de')) initial = 'de';
+  setLang(initial);
+})();
+</script>
+
 </body>
 </html>
