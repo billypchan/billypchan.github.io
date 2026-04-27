@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>GPX Splitter</title>
+</head>
+<body>
+  <input type="file" id="file" accept=".gpx" />
+  <input type="number" id="km" value="100" /> km
+  <button onclick="process()">Split</button>
+
+<script>
+const GPX_NS = "http://www.topografix.com/GPX/1/1";
+
+function haversine(a, b) {
+  const R = 6371e3;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+
+  const A = Math.sin(dLat/2)**2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) *
+    Math.sin(dLon/2)**2;
+
+  return 2 * R * Math.atan2(Math.sqrt(A), Math.sqrt(1-A));
+}
+
+function process() {
+  const file = document.getElementById('file').files[0];
+  const maxDist = document.getElementById('km').value * 1000;
+
+  const reader = new FileReader();
+  reader.onload = e => splitGPX(e.target.result, maxDist);
+  reader.readAsText(file);
+}
+
+function splitGPX(text, maxDist) {
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(text, "application/xml");
+
+  const gpx = xml.documentElement;
+  const metadata = gpx.querySelector("metadata");
+  const pts = Array.from(xml.getElementsByTagName("trkpt"));
+
+  let segments = [];
+  let current = [pts[0]];
+  let dist = 0;
+
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i-1];
+    const b = pts[i];
+
+    const d = haversine(
+      {lat: +a.getAttribute("lat"), lon: +a.getAttribute("lon")},
+      {lat: +b.getAttribute("lat"), lon: +b.getAttribute("lon")}
+    );
+
+    if (dist + d > maxDist) {
+      segments.push(current);
+      current = [];
+      dist = 0;
+    }
+
+    current.push(b);
+    dist += d;
+  }
+
+  if (current.length) segments.push(current);
+
+  segments.forEach((seg, i) => downloadSegment(gpx, metadata, seg, i+1));
+}
+
+function downloadSegment(originalGPX, metadata, pts, index) {
+  const doc = document.implementation.createDocument(GPX_NS, "gpx", null);
+  const gpx = doc.documentElement;
+
+  // copy attributes (critical)
+  for (let attr of originalGPX.attributes) {
+    gpx.setAttribute(attr.name, attr.value);
+  }
+
+  if (metadata) {
+    gpx.appendChild(doc.importNode(metadata, true));
+  }
+
+  const trk = doc.createElementNS(GPX_NS, "trk");
+  const seg = doc.createElementNS(GPX_NS, "trkseg");
+
+  pts.forEach(p => seg.appendChild(doc.importNode(p, true)));
+
+  trk.appendChild(seg);
+  gpx.appendChild(trk);
+
+  const xml = new XMLSerializer().serializeToString(doc);
+
+  const blob = new Blob(
+    ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + xml],
+    {type: "application/gpx+xml"}
+  );
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `split_${index}.gpx`;
+  a.click();
+}
+</script>
+</body>
+</html>
