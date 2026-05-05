@@ -71,6 +71,55 @@
     .lang-btn.active,
     .lang-btn:hover { background: var(--surface); color: var(--text); }
 
+    /* ── HERO CHIPS ── */
+    .hero-chips {
+      display: flex; justify-content: center; gap: 10px;
+      flex-wrap: wrap; margin-bottom: 28px;
+    }
+    .hero-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 40px; padding: 6px 14px 6px 6px;
+      font-size: 13px; font-weight: 500; color: var(--text);
+    }
+    .hero-chip img {
+      width: 28px; height: 28px; border-radius: 7px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox-overlay {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,.85); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+      cursor: zoom-out;
+    }
+    .lightbox-overlay.open { display: flex; }
+    .lightbox-overlay img {
+      max-width: 90vw; max-height: 88vh;
+      border-radius: 16px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.6);
+      animation: lbIn .2s ease;
+    }
+    .lightbox-close {
+      position: fixed; top: 20px; right: 24px;
+      background: rgba(255,255,255,.15); border: none;
+      color: #fff; font-size: 22px; line-height: 1;
+      width: 40px; height: 40px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,.25); }
+    @keyframes lbIn {
+      from { opacity: 0; transform: scale(.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    /* Make screenshot/watch/widget images feel clickable */
+    .screenshot-frame img,
+    .watch-frame img,
+    .widget-img img {
+      cursor: zoom-in;
+    }
+
     /* ── HERO ── */
     .hero {
       max-width: var(--max-w); margin: 0 auto;
@@ -297,10 +346,16 @@
 </head>
 <body>
 
+<!-- LIGHTBOX -->
+<div class="lightbox-overlay" id="lightbox" role="dialog" aria-modal="true">
+  <button class="lightbox-close" id="lbClose" aria-label="Close">✕</button>
+  <img id="lbImg" src="" alt="" />
+</div>
+
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="#" class="nav-logo" data-i18n="nav.title">Transit Apps</a>
+    <a href="#" class="nav-logo" data-i18n="nav.title">Apps by Bill Chan</a>
     <div class="nav-right">
       <ul class="nav-links">
         <li><a href="#youbike">YouBike</a></li>
@@ -319,9 +374,22 @@
 
 <!-- HERO -->
 <section class="hero">
-  <p class="hero-eyebrow" data-i18n="hero.eyebrow">Apple Watch &amp; iOS</p>
-  <h1 data-i18n="hero.title">Move through the city,<br>effortlessly.</h1>
-  <p data-i18n="hero.subtitle">Two apps. Two cities. Built for the wrist — and the pocket.</p>
+  <div class="hero-chips">
+    <div class="hero-chip">
+      <img src="assets/youbike-icon.png" alt="YouBike Nearby" />
+      <span>YouBike Nearby</span>
+    </div>
+    <div class="hero-chip">
+      <img src="assets/berlin-icon.png" alt="BB Timetable" />
+      <span>BB Timetable</span>
+    </div>
+    <div class="hero-chip">
+      <img src="assets/iching-icon.png" alt="周易占卜" />
+      <span>周易占卜</span>
+    </div>
+  </div>
+  <h1 data-i18n="hero.title">Three apps.<br>One developer.</h1>
+  <p data-i18n="hero.subtitle">Transit in Taiwan. Transit in Berlin. Ancient wisdom, anywhere. All made for the wrist.</p>
 </section>
 
 <!-- APPS -->
@@ -414,95 +482,6 @@
         </div>
         <div class="screenshot-frame">
           <img src="assets/youbike-travel.png" alt="YouBike travel planning" loading="lazy" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- iChing -->
-  <div class="app-card iching" id="iching">
-    <div class="card-content">
-      <div class="app-header">
-        <div class="app-icon">
-          <img src="assets/iching-icon.png" alt="周易占卜 icon" />
-        </div>
-        <div class="app-title-block">
-          <div class="app-name" data-i18n="iching.name">周易占卜</div>
-          <div class="app-subtitle" data-i18n="iching.subtitle">六十四卦全文・揲蓍占卜術</div>
-          <div class="platform-tags">
-            <span class="tag">iPhone</span>
-            <span class="tag">Apple Watch</span>
-            <span class="tag">Android</span>
-            <span class="tag" data-i18n="iching.region">Chinese</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="app-prose" data-i18n="iching.prose"></div>
-
-      <div class="features-grid">
-        <div class="feature-item">
-          <div class="feature-icon">🪄</div>
-          <div class="feature-name" data-i18n="iching.f1.name">Yarrow Stalk Method</div>
-          <div class="feature-desc" data-i18n="iching.f1.desc">Traditional 揲蓍法 — the oldest, most orthodox way to cast a hexagram.</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">📖</div>
-          <div class="feature-name" data-i18n="iching.f2.name">64 Hexagrams</div>
-          <div class="feature-desc" data-i18n="iching.f2.desc">Complete 卦辭, 彖曰, 象曰 and all six line texts — nothing abridged.</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">⌚</div>
-          <div class="feature-name" data-i18n="iching.f3.name">Apple Watch</div>
-          <div class="feature-desc" data-i18n="iching.f3.desc">Cast and read your hexagram right from your wrist.</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🔊</div>
-          <div class="feature-name" data-i18n="iching.f4.name">Text-to-Speech</div>
-          <div class="feature-desc" data-i18n="iching.f4.desc">Listen to the full text read aloud. Feel the rhythm of ancient Chinese.</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🔄</div>
-          <div class="feature-name" data-i18n="iching.f5.name">Companion Hexagrams</div>
-          <div class="feature-desc" data-i18n="iching.f5.desc">錯卦 and 綜卦 calculated automatically. One tap to navigate.</div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">📍</div>
-          <div class="feature-name" data-i18n="iching.f6.name">Reading Record</div>
-          <div class="feature-desc" data-i18n="iching.f6.desc">Date, time, and location saved for every divination.</div>
-        </div>
-      </div>
-
-      <div class="card-footer">
-        <a class="btn-store" href="https://apps.apple.com/us/app/%E5%91%A8%E6%98%93%E5%8D%A0%E5%8D%9C/id1281739482" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.19 1.28-2.17 3.82.03 3.02 2.65 4.03 2.68 4.04l-.06.26zm-8.35-16.5C11.23 1.6 13 .5 14.32.5c.05 1.36-.4 2.71-1.2 3.7-.78.97-2.01 1.72-3.26 1.62-.07-1.28.46-2.56 1.5-3.32z"/></svg>
-          <span data-i18n="cta.appstore">Download on the App Store</span>
-        </a>
-        <span class="version-label">v3.3</span>
-      </div>
-    </div>
-
-    <div class="card-screenshots">
-      <div class="watch-row">
-        <div class="watch-frame">
-          <img src="assets/iching-watch-0.png" alt="iChing Watch divination" loading="lazy" />
-        </div>
-        <div class="watch-frame raised">
-          <img src="assets/iching-watch-1.png" alt="iChing Watch result" loading="lazy" />
-        </div>
-        <div class="watch-frame">
-          <img src="assets/iching-watch-2.png" alt="iChing Watch hexagram" loading="lazy" />
-        </div>
-      </div>
-      <div class="screenshot-row">
-        <div class="screenshot-frame">
-          <img src="assets/iching-iphone-0.png" alt="iChing divination result" loading="lazy" />
-        </div>
-        <div class="screenshot-frame raised">
-          <img src="assets/iching-iphone-1.png" alt="iChing hexagram detail" loading="lazy" />
-        </div>
-        <div class="screenshot-frame">
-          <img src="assets/iching-iphone-2.png" alt="iChing explore grid" loading="lazy" />
         </div>
       </div>
     </div>
@@ -619,6 +598,95 @@
     </div>
   </div>
 
+  <!-- iChing -->
+  <div class="app-card iching" id="iching">
+    <div class="card-content">
+      <div class="app-header">
+        <div class="app-icon">
+          <img src="assets/iching-icon.png" alt="周易占卜 icon" />
+        </div>
+        <div class="app-title-block">
+          <div class="app-name" data-i18n="iching.name">周易占卜</div>
+          <div class="app-subtitle" data-i18n="iching.subtitle">六十四卦全文・揲蓍占卜術</div>
+          <div class="platform-tags">
+            <span class="tag">iPhone</span>
+            <span class="tag">Apple Watch</span>
+            <span class="tag">Android</span>
+            <span class="tag" data-i18n="iching.region">Chinese</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-prose" data-i18n="iching.prose"></div>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🪄</div>
+          <div class="feature-name" data-i18n="iching.f1.name">Yarrow Stalk Method</div>
+          <div class="feature-desc" data-i18n="iching.f1.desc">Traditional 揲蓍法 — the oldest, most orthodox way to cast a hexagram.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📖</div>
+          <div class="feature-name" data-i18n="iching.f2.name">64 Hexagrams</div>
+          <div class="feature-desc" data-i18n="iching.f2.desc">Complete 卦辭, 彖曰, 象曰 and all six line texts — nothing abridged.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⌚</div>
+          <div class="feature-name" data-i18n="iching.f3.name">Apple Watch</div>
+          <div class="feature-desc" data-i18n="iching.f3.desc">Cast and read your hexagram right from your wrist.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔊</div>
+          <div class="feature-name" data-i18n="iching.f4.name">Text-to-Speech</div>
+          <div class="feature-desc" data-i18n="iching.f4.desc">Listen to the full text read aloud. Feel the rhythm of ancient Chinese.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔄</div>
+          <div class="feature-name" data-i18n="iching.f5.name">Companion Hexagrams</div>
+          <div class="feature-desc" data-i18n="iching.f5.desc">錯卦 and 綜卦 calculated automatically. One tap to navigate.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📍</div>
+          <div class="feature-name" data-i18n="iching.f6.name">Reading Record</div>
+          <div class="feature-desc" data-i18n="iching.f6.desc">Date, time, and location saved for every divination.</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a class="btn-store" href="https://apps.apple.com/us/app/%E5%91%A8%E6%98%93%E5%8D%A0%E5%8D%9C/id1281739482" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.19 1.28-2.17 3.82.03 3.02 2.65 4.03 2.68 4.04l-.06.26zm-8.35-16.5C11.23 1.6 13 .5 14.32.5c.05 1.36-.4 2.71-1.2 3.7-.78.97-2.01 1.72-3.26 1.62-.07-1.28.46-2.56 1.5-3.32z"/></svg>
+          <span data-i18n="cta.appstore">Download on the App Store</span>
+        </a>
+        <span class="version-label">v3.3</span>
+      </div>
+    </div>
+
+    <div class="card-screenshots">
+      <div class="watch-row">
+        <div class="watch-frame">
+          <img src="assets/iching-watch-0.png" alt="iChing Watch divination" loading="lazy" />
+        </div>
+        <div class="watch-frame raised">
+          <img src="assets/iching-watch-1.png" alt="iChing Watch result" loading="lazy" />
+        </div>
+        <div class="watch-frame">
+          <img src="assets/iching-watch-2.png" alt="iChing Watch hexagram" loading="lazy" />
+        </div>
+      </div>
+      <div class="screenshot-row">
+        <div class="screenshot-frame">
+          <img src="assets/iching-iphone-0.png" alt="iChing divination result" loading="lazy" />
+        </div>
+        <div class="screenshot-frame raised">
+          <img src="assets/iching-iphone-1.png" alt="iChing hexagram detail" loading="lazy" />
+        </div>
+        <div class="screenshot-frame">
+          <img src="assets/iching-iphone-2.png" alt="iChing explore grid" loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ABOUT -->
@@ -650,11 +718,11 @@
 <script>
 const i18n = {
   en: {
-    "nav.title": "Transit Apps",
+    "nav.title": "Apps by Bill Chan",
     "nav.about": "About",
-    "hero.eyebrow": "Apple Watch & iOS",
-    "hero.title": "Move through the city,<br>effortlessly.",
-    "hero.subtitle": "Two apps. Two cities. Built for the wrist — and the pocket.",
+    "hero.eyebrow": "Apple Watch · iPhone · Android",
+    "hero.title": "Three apps.<br>One developer.",
+    "hero.subtitle": "Transit in Taiwan. Transit in Berlin. Ancient wisdom, anywhere. All made for the wrist.",
     "youbike.name": "YouBike Nearby",
     "youbike.subtitle": "Discover & Ride for YouBike",
     "youbike.region": "Taiwan",
@@ -691,11 +759,11 @@ const i18n = {
   },
 
   zh: {
-    "nav.title": "交通 Apps",
+    "nav.title": "Bill Chan 的 Apps",
     "nav.about": "關於",
-    "hero.eyebrow": "Apple Watch 與 iOS",
-    "hero.title": "穿越城市，<br>從容不迫。",
-    "hero.subtitle": "兩款 App，兩座城市。為手腕而生，也為口袋而設。",
+    "hero.eyebrow": "Apple Watch · iPhone · Android",
+    "hero.title": "三款應用，<br>一位開發者。",
+    "hero.subtitle": "台灣騎車、柏林搭車、隨時起卦。為手腕而生。",
     "youbike.name": "YouBike在哪",
     "youbike.subtitle": "發現、定位、騎行：您的 YouBike 必備助手",
     "youbike.region": "台灣",
@@ -732,11 +800,11 @@ const i18n = {
   },
 
   de: {
-    "nav.title": "Transit Apps",
+    "nav.title": "Apps von Bill Chan",
     "nav.about": "Über",
-    "hero.eyebrow": "Apple Watch & iOS",
-    "hero.title": "Durch die Stadt,<br>ganz entspannt.",
-    "hero.subtitle": "Zwei Apps. Zwei Städte. Für das Handgelenk — und die Hosentasche.",
+    "hero.eyebrow": "Apple Watch · iPhone · Android",
+    "hero.title": "Drei Apps.<br>Ein Entwickler.",
+    "hero.subtitle": "Fahrrad in Taiwan. Zug in Berlin. I Ging überall. Fürs Handgelenk gemacht.",
     "youbike.name": "YouBike Nearby",
     "youbike.subtitle": "Entdecken & Fahren mit YouBike",
     "youbike.region": "Taiwan",
@@ -799,6 +867,33 @@ function setLang(lang) {
 function langLabel(lang) {
   return { en: 'EN', zh: '中文', de: 'DE' }[lang];
 }
+
+// ── LIGHTBOX ──
+(function() {
+  const overlay = document.getElementById('lightbox');
+  const lbImg   = document.getElementById('lbImg');
+  const lbClose = document.getElementById('lbClose');
+
+  function open(src, alt) {
+    lbImg.src = src; lbImg.alt = alt || '';
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    lbImg.src = '';
+  }
+
+  // Attach to all zoomable images
+  document.querySelectorAll('.screenshot-frame img, .watch-frame img, .widget-img img').forEach(img => {
+    img.addEventListener('click', () => open(img.src, img.alt));
+  });
+
+  overlay.addEventListener('click', e => { if (e.target !== lbImg) close(); });
+  lbClose.addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+})();
 
 // Auto-detect browser language on load
 (function() {
