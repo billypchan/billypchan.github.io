@@ -16,6 +16,7 @@
       --secondary: #6e6e73;
       --accent-youbike: #28a745;
       --accent-berlin: #0071e3;
+      --accent-iching: #c4932b;
       --radius: 20px;
       --max-w: 960px;
     }
@@ -108,6 +109,7 @@
     }
     .youbike::before { background: var(--accent-youbike); }
     .berlin::before  { background: var(--accent-berlin); }
+    .iching::before  { background: var(--accent-iching); }
 
     /* Left: content */
     .card-content { padding: 48px 48px 44px; }
@@ -157,6 +159,7 @@
     .btn-store:hover { opacity: .85; transform: scale(1.01); }
     .youbike .btn-store { background: var(--accent-youbike); }
     .berlin  .btn-store { background: var(--accent-berlin); }
+    .iching  .btn-store { background: var(--accent-iching); }
     .btn-store svg { width: 15px; height: 15px; fill: currentColor; flex-shrink: 0; }
     .version-label { font-size: 12px; color: var(--secondary); }
 
@@ -168,6 +171,7 @@
     }
     .youbike .card-screenshots { background: linear-gradient(160deg, #d4f0dc 0%, #b8e5c4 100%); }
     .berlin  .card-screenshots { background: linear-gradient(160deg, #d0e8ff 0%, #b8d5f8 100%); }
+    .iching  .card-screenshots { background: linear-gradient(160deg, #fef3c7 0%, #fde68a 100%); }
 
     .screenshot-frame {
       width: 130px; flex-shrink: 0;
@@ -301,6 +305,7 @@
       <ul class="nav-links">
         <li><a href="#youbike">YouBike</a></li>
         <li><a href="#berlin">BB Timetable</a></li>
+        <li><a href="#iching">周易占卜</a></li>
         <li><a href="#about" data-i18n="nav.about">About</a></li>
       </ul>
       <div class="lang-switcher">
@@ -409,6 +414,95 @@
         </div>
         <div class="screenshot-frame">
           <img src="assets/youbike-travel.png" alt="YouBike travel planning" loading="lazy" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- iChing -->
+  <div class="app-card iching" id="iching">
+    <div class="card-content">
+      <div class="app-header">
+        <div class="app-icon">
+          <img src="assets/iching-icon.png" alt="周易占卜 icon" />
+        </div>
+        <div class="app-title-block">
+          <div class="app-name" data-i18n="iching.name">周易占卜</div>
+          <div class="app-subtitle" data-i18n="iching.subtitle">六十四卦全文・揲蓍占卜術</div>
+          <div class="platform-tags">
+            <span class="tag">iPhone</span>
+            <span class="tag">Apple Watch</span>
+            <span class="tag">Android</span>
+            <span class="tag" data-i18n="iching.region">Chinese</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-prose" data-i18n="iching.prose"></div>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">🪄</div>
+          <div class="feature-name" data-i18n="iching.f1.name">Yarrow Stalk Method</div>
+          <div class="feature-desc" data-i18n="iching.f1.desc">Traditional 揲蓍法 — the oldest, most orthodox way to cast a hexagram.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📖</div>
+          <div class="feature-name" data-i18n="iching.f2.name">64 Hexagrams</div>
+          <div class="feature-desc" data-i18n="iching.f2.desc">Complete 卦辭, 彖曰, 象曰 and all six line texts — nothing abridged.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">⌚</div>
+          <div class="feature-name" data-i18n="iching.f3.name">Apple Watch</div>
+          <div class="feature-desc" data-i18n="iching.f3.desc">Cast and read your hexagram right from your wrist.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔊</div>
+          <div class="feature-name" data-i18n="iching.f4.name">Text-to-Speech</div>
+          <div class="feature-desc" data-i18n="iching.f4.desc">Listen to the full text read aloud. Feel the rhythm of ancient Chinese.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔄</div>
+          <div class="feature-name" data-i18n="iching.f5.name">Companion Hexagrams</div>
+          <div class="feature-desc" data-i18n="iching.f5.desc">錯卦 and 綜卦 calculated automatically. One tap to navigate.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📍</div>
+          <div class="feature-name" data-i18n="iching.f6.name">Reading Record</div>
+          <div class="feature-desc" data-i18n="iching.f6.desc">Date, time, and location saved for every divination.</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a class="btn-store" href="https://apps.apple.com/us/app/%E5%91%A8%E6%98%93%E5%8D%A0%E5%8D%9C/id1281739482" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.15-2.19 1.28-2.17 3.82.03 3.02 2.65 4.03 2.68 4.04l-.06.26zm-8.35-16.5C11.23 1.6 13 .5 14.32.5c.05 1.36-.4 2.71-1.2 3.7-.78.97-2.01 1.72-3.26 1.62-.07-1.28.46-2.56 1.5-3.32z"/></svg>
+          <span data-i18n="cta.appstore">Download on the App Store</span>
+        </a>
+        <span class="version-label">v3.3</span>
+      </div>
+    </div>
+
+    <div class="card-screenshots">
+      <div class="watch-row">
+        <div class="watch-frame">
+          <img src="assets/iching-watch-0.png" alt="iChing Watch divination" loading="lazy" />
+        </div>
+        <div class="watch-frame raised">
+          <img src="assets/iching-watch-1.png" alt="iChing Watch result" loading="lazy" />
+        </div>
+        <div class="watch-frame">
+          <img src="assets/iching-watch-2.png" alt="iChing Watch hexagram" loading="lazy" />
+        </div>
+      </div>
+      <div class="screenshot-row">
+        <div class="screenshot-frame">
+          <img src="assets/iching-iphone-0.png" alt="iChing divination result" loading="lazy" />
+        </div>
+        <div class="screenshot-frame raised">
+          <img src="assets/iching-iphone-1.png" alt="iChing hexagram detail" loading="lazy" />
+        </div>
+        <div class="screenshot-frame">
+          <img src="assets/iching-iphone-2.png" alt="iChing explore grid" loading="lazy" />
         </div>
       </div>
     </div>
@@ -580,6 +674,16 @@ const i18n = {
     "berlin.f4.name": "Apple Watch", "berlin.f4.desc": "Nearby stops, departures, journey planning on your wrist.",
     "berlin.f5.name": "Favorites", "berlin.f5.desc": "Your lines, your directions. Pinned to the top.",
     "berlin.f6.name": "Smart Notifications", "berlin.f6.desc": "Next stop, platform, transfer. AI summaries on iOS 26+.",
+    "iching.name": "周易占卜",
+    "iching.subtitle": "I Ching · 64 Hexagrams",
+    "iching.region": "Chinese",
+    "iching.prose": "The coins fall.\nSix lines take shape.\n\nAncient text, still speaking.\nA question asked centuries ago — answered for you, now.",
+    "iching.f1.name": "Yarrow Stalk Method", "iching.f1.desc": "Traditional 揲蓍法 — the oldest, most orthodox way to cast a hexagram.",
+    "iching.f2.name": "64 Hexagrams", "iching.f2.desc": "Complete 卦辭, 彖曰, 象曰 and all six line texts — nothing abridged.",
+    "iching.f3.name": "Apple Watch", "iching.f3.desc": "Cast and read your hexagram right from your wrist.",
+    "iching.f4.name": "Text-to-Speech", "iching.f4.desc": "Listen to the full text read aloud. Feel the rhythm of ancient Chinese.",
+    "iching.f5.name": "Companion Hexagrams", "iching.f5.desc": "錯卦 and 綜卦 calculated automatically. One tap to navigate.",
+    "iching.f6.name": "Reading Record", "iching.f6.desc": "Date, time, and location saved for every divination.",
     "cta.appstore": "Download on the App Store",
     "about.title": "Built by Bill Chan",
     "about.body": "Independent developer making transit on Apple Watch feel like it was always supposed to be there.",
@@ -611,6 +715,16 @@ const i18n = {
     "berlin.f4.name": "Apple Watch", "berlin.f4.desc": "附近站點、班次、旅程規劃——抬腕即看。",
     "berlin.f5.name": "最愛路線", "berlin.f5.desc": "你的線路與方向，釘在最上方。",
     "berlin.f6.name": "智慧通知", "berlin.f6.desc": "下一站、月台、換車資訊，iOS 26 支援 AI 摘要。",
+    "iching.name": "周易占卜",
+    "iching.subtitle": "六十四卦全文・揲蓍占卜術",
+    "iching.region": "中文",
+    "iching.prose": "蓍草一撂，\n六爻成象。\n\n古文照今，\n問者得其所需。",
+    "iching.f1.name": "揲蓍起卦", "iching.f1.desc": "採用最古老、最正統的揲蓍法，演算本卦與之卦。",
+    "iching.f2.name": "六十四卦原文", "iching.f2.desc": "完整呈現卦辭、彖曰、象曰及六爻爻辭，一字不漏。",
+    "iching.f3.name": "Apple Watch", "iching.f3.desc": "抬腕即可起卦、閱卦，隨時隨地問卜。",
+    "iching.f4.name": "語音朗讀", "iching.f4.desc": "一鍵聆聽全文朗讀，感受古文的韻律之美。",
+    "iching.f5.name": "錯卦・綜卦", "iching.f5.desc": "自動計算錯卦與綜卦，前後卦一鍵導覽。",
+    "iching.f6.name": "占問記錄", "iching.f6.desc": "記錄每次占卜的日期、時間與所在地點。",
     "cta.appstore": "在 App Store 下載",
     "about.title": "開發者：Bill Chan",
     "about.body": "獨立開發者，致力於讓 Apple Watch 上的交通體驗，回歸它本來應有的樣子。",
@@ -642,6 +756,16 @@ const i18n = {
     "berlin.f4.name": "Apple Watch", "berlin.f4.desc": "Nahe Haltestellen, Abfahrten, Reiseplanung am Handgelenk.",
     "berlin.f5.name": "Favoriten", "berlin.f5.desc": "Deine Linien und Richtungen. Oben angepinnt.",
     "berlin.f6.name": "Smarte Benachrichtigungen", "berlin.f6.desc": "Nächste Haltestelle, Bahnsteig, Anschluss. KI-Zusammenfassung ab iOS 26.",
+    "iching.name": "周易占卜",
+    "iching.subtitle": "I Ching · 64 Hexagramme",
+    "iching.region": "Chinesisch",
+    "iching.prose": "Die Münzen fallen.\nSechs Linien entstehen.\n\nUralter Text, noch immer sprechend.\nEine Antwort, Jahrhunderte alt — für dich, jetzt.",
+    "iching.f1.name": "Schafgarben-Methode", "iching.f1.desc": "Traditionelle 揲蓍法 — die älteste, orthodoxeste Art, ein Hexagramm zu werfen.",
+    "iching.f2.name": "64 Hexagramme", "iching.f2.desc": "Vollständiger Text: 卦辭, 彖曰, 象曰 und alle sechs Linienstrophen.",
+    "iching.f3.name": "Apple Watch", "iching.f3.desc": "Hexagramm direkt am Handgelenk werfen und lesen.",
+    "iching.f4.name": "Vorlesung", "iching.f4.desc": "Den vollständigen Text vorlesen lassen. Den Rhythmus des klassischen Chinesisch spüren.",
+    "iching.f5.name": "Begleit-Hexagramme", "iching.f5.desc": "錯卦 und 綜卦 automatisch berechnet. Ein Tipp zur Navigation.",
+    "iching.f6.name": "Lese-Protokoll", "iching.f6.desc": "Datum, Uhrzeit und Ort jeder Orakel-Sitzung gespeichert.",
     "cta.appstore": "Im App Store laden",
     "about.title": "Entwickelt von Bill Chan",
     "about.body": "Unabhängiger Entwickler — macht Transit auf der Apple Watch so, wie es sich immer angefühlt haben sollte.",
