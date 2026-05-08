@@ -257,6 +257,18 @@
       border-color: var(--accent);
       background: color-mix(in srgb, var(--accent) 12%, transparent);
     }
+
+    .sticky-result {
+      position: sticky;
+      top: 0.5rem;
+      z-index: 10;
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+    }
+    @supports not (backdrop-filter: blur(12px)) {
+      .sticky-result { background: var(--card); }
+    }
   </style>
 </head>
 <body>
@@ -265,6 +277,25 @@
       <h1>Recumbent Tyre Pressure Calculator</h1>
       <p>Tuned for recumbents, mixed wheel sizes (700c, 650c, 559, 451, 406, 349), TPU/latex/tubeless setups, and manufacturer min/max limits. Inspired by the SRAM AXS and Vittoria calculators.</p>
     </header>
+
+    <section id="resultsCard" class="card sticky-result">
+      <h2>Recommended pressures</h2>
+      <div class="results">
+        <div class="result">
+          <div class="which">Front</div>
+          <div><span class="psi" id="frontPsi">—</span><span class="psi-unit">psi</span></div>
+          <div class="bar" id="frontBar">— bar</div>
+          <div class="load" id="frontLoad"></div>
+        </div>
+        <div class="result">
+          <div class="which">Rear</div>
+          <div><span class="psi" id="rearPsi">—</span><span class="psi-unit">psi</span></div>
+          <div class="bar" id="rearBar">— bar</div>
+          <div class="load" id="rearLoad"></div>
+        </div>
+      </div>
+      <div id="notes"></div>
+    </section>
 
     <section class="card">
       <h2>Rider &amp; Bike</h2>
@@ -441,27 +472,6 @@
       </div>
     </section>
 
-    <button class="primary" onclick="calculate()">Calculate</button>
-
-    <section id="resultsCard" class="card" style="display:none; margin-top:1rem;">
-      <h2>Recommended pressures</h2>
-      <div class="results">
-        <div class="result">
-          <div class="which">Front</div>
-          <div><span class="psi" id="frontPsi">—</span><span class="psi-unit">psi</span></div>
-          <div class="bar" id="frontBar">— bar</div>
-          <div class="load" id="frontLoad"></div>
-        </div>
-        <div class="result">
-          <div class="which">Rear</div>
-          <div><span class="psi" id="rearPsi">—</span><span class="psi-unit">psi</span></div>
-          <div class="bar" id="rearBar">— bar</div>
-          <div class="load" id="rearLoad"></div>
-        </div>
-      </div>
-      <div id="notes"></div>
-    </section>
-
     <details>
       <summary>How does this calculator work?</summary>
       <p>The base pressure follows the Berto / Bicycle Quarterly “15 % tyre drop” rule:</p>
@@ -512,6 +522,12 @@
     $('distribution').addEventListener('change', e => {
       $('customDistRow').style.display = e.target.value === 'custom' ? '' : 'none';
     });
+
+    function wireLiveUpdates() {
+      const root = document.querySelector('main');
+      root.addEventListener('input', calculate);
+      root.addEventListener('change', calculate);
+    }
 
     function frontShare() {
       const v = $('distribution').value;
@@ -586,7 +602,6 @@
         rPsi = rMaxPsi;
       }
 
-      $('resultsCard').style.display = '';
       $('frontPsi').textContent = fPsi.toFixed(0);
       $('frontBar').textContent = `${psiToBar(fPsi).toFixed(2)} bar` + (Math.abs(fPsi - fIdeal) > 0.5 ? ` · ideal ${fIdeal.toFixed(0)} psi` : '');
       $('frontLoad').textContent = `Load ≈ ${fLoad.toFixed(1)} kg · effective width ${fEff.toFixed(1)} mm`;
@@ -597,6 +612,9 @@
       const notesEl = $('notes');
       notesEl.innerHTML = notes.map(n => `<div class="notice">${n}</div>`).join('');
     }
+
+    wireLiveUpdates();
+    calculate();
   </script>
 </body>
 </html>
