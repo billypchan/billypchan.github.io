@@ -321,8 +321,13 @@
           </select>
         </div>
         <div class="field">
-          <label>Tyre width (mm)</label>
+          <label>Tyre width (mm, nominal)</label>
           <input type="number" id="frontWidth" value="28" min="18" max="80" step="1">
+        </div>
+        <div class="field">
+          <label>Inner rim width (mm)</label>
+          <input type="number" id="frontRim" value="19" min="10" max="40" step="0.5">
+          <span class="hint">Wider rims widen the tyre — lowers optimum pressure.</span>
         </div>
         <div class="field">
           <label>Min pressure (sidewall)</label>
@@ -364,8 +369,13 @@
           </select>
         </div>
         <div class="field">
-          <label>Tyre width (mm)</label>
+          <label>Tyre width (mm, nominal)</label>
           <input type="number" id="rearWidth" value="32" min="18" max="80" step="1">
+        </div>
+        <div class="field">
+          <label>Inner rim width (mm)</label>
+          <input type="number" id="rearRim" value="21" min="10" max="40" step="0.5">
+          <span class="hint">Typical modern road: 19–21 mm; gravel: 23–25 mm.</span>
         </div>
         <div class="field">
           <label>Min pressure (sidewall)</label>
@@ -418,6 +428,17 @@
           <label><input type="radio" name="style" value="performance"><span>Performance</span></label>
         </div>
       </div>
+      <div class="field" style="margin-top: 0.75rem;">
+        <label>Weather</label>
+        <div class="pill-row">
+          <label><input type="radio" name="weather" value="dry" checked><span>Dry &amp; mild</span></label>
+          <label><input type="radio" name="weather" value="wet"><span>Wet</span></label>
+          <label><input type="radio" name="weather" value="cold"><span>Cold (&lt; 5 °C)</span></label>
+          <label><input type="radio" name="weather" value="wetcold"><span>Wet &amp; cold</span></label>
+          <label><input type="radio" name="weather" value="hot"><span>Hot (&gt; 30 °C)</span></label>
+        </div>
+        <span class="hint">Wet/cold conditions get a small drop for grip; hot conditions a small drop because pressure rises as the tyre heats up.</span>
+      </div>
     </section>
 
     <button class="primary" onclick="calculate()">Calculate</button>
@@ -447,12 +468,14 @@
       <p style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; background:var(--card); padding:0.5rem; border-radius:6px;">
         P<sub>psi</sub> ≈ 2.0 × Load<sub>kg</sub> × (25 / width<sub>mm</sub>)<sup>1.5</sup>
       </p>
+      <p><em>Width</em> here is the <strong>effective</strong> width on your rim, not the nominal label. The ETRTO/Schwalbe rule is roughly <code>effective = nominal + 0.4 × (rim_inner − 19 mm)</code>, so a 28 mm tyre on a 23 mm rim measures ~29.6 mm, which lowers the optimum pressure.</p>
       <p>That base is multiplied by:</p>
       <ul style="padding-left:1.2rem;">
         <li><strong>Wheel size factor</strong> — smaller wheels (451, 406, 349) need slightly higher pressure to keep the same percentage drop, because the contact patch geometry changes.</li>
         <li><strong>Tube / casing factor</strong> — tubeless and TPU lose less energy at lower pressure, so they're run a bit softer (TPU −4 %, latex −3 %, tubeless −8 %).</li>
         <li><strong>Surface factor</strong> — rougher roads roll faster at lower pressures (down to −15 % on gravel).</li>
         <li><strong>Style factor</strong> — comfort −7 %, performance +5 %.</li>
+        <li><strong>Weather factor</strong> — wet −7 %, cold −3 %, wet &amp; cold −10 %, hot −2 % (since pressure rises as the tyre heats up).</li>
       </ul>
       <p>Recumbents put more weight on the rear wheel than uprights — typically 60–70 %. The presets cover common short-, mid-, and long-wheelbase layouts, plus a custom value.</p>
       <p>The result is finally clamped to the sidewall min / max you enter (e.g. Schwalbe One min 85 psi). If the calculated value is outside the safe range, you'll see a warning.</p>
@@ -474,6 +497,8 @@
     const TUBE_FACTOR = { butyl: 1.00, latex: 0.97, tpu: 0.96, tubeless: 0.92 };
     const SURFACE_FACTOR = { smooth: 1.00, mixed: 0.95, rough: 0.90, gravel: 0.85 };
     const STYLE_FACTOR = { comfort: 0.93, balanced: 1.00, performance: 1.05 };
+    const WEATHER_FACTOR = { dry: 1.00, wet: 0.93, cold: 0.97, wetcold: 0.90, hot: 0.98 };
+    const REFERENCE_RIM_MM = 19;
 
     function radio(name) {
       const el = document.querySelector(`input[name="${name}"]:checked`);
@@ -497,10 +522,17 @@
       return parseFloat(v);
     }
 
-    function pressureFor(loadKg, widthMm, wheelEtrto, tubeF, surfF, styleF) {
+    function effectiveWidth(nominalMm, rimMm) {
+      // ETRTO/Schwalbe rule of thumb: tyre widens ~0.4 mm per mm of rim
+      // wider than the manufacturer's reference rim.
+      return nominalMm + 0.4 * (rimMm - REFERENCE_RIM_MM);
+    }
+
+    function pressureFor(loadKg, nominalWidth, rimWidth, wheelEtrto, tubeF, surfF, styleF, weatherF) {
       const wheelF = WHEEL_FACTOR[wheelEtrto] ?? 1.0;
-      const base = 2.0 * loadKg * Math.pow(25 / widthMm, 1.5);
-      return base * wheelF * tubeF * surfF * styleF;
+      const effW = Math.max(15, effectiveWidth(nominalWidth, rimWidth));
+      const base = 2.0 * loadKg * Math.pow(25 / effW, 1.5);
+      return base * wheelF * tubeF * surfF * styleF * weatherF;
     }
 
     function calculate() {
@@ -518,20 +550,25 @@
       const tubeF = TUBE_FACTOR[radio('tube')] ?? 1.0;
       const surfF = SURFACE_FACTOR[radio('surface')] ?? 1.0;
       const styleF = STYLE_FACTOR[radio('style')] ?? 1.0;
+      const weatherF = WEATHER_FACTOR[radio('weather')] ?? 1.0;
 
       const fWheel = parseInt($('frontWheel').value, 10);
       const rWheel = parseInt($('rearWheel').value, 10);
       const fWidth = parseFloat($('frontWidth').value) || 28;
       const rWidth = parseFloat($('rearWidth').value) || 32;
+      const fRim = parseFloat($('frontRim').value) || REFERENCE_RIM_MM;
+      const rRim = parseFloat($('rearRim').value) || REFERENCE_RIM_MM;
 
       const fMinPsi = toPsi(parseFloat($('frontMin').value) || 0, $('frontMinUnit').value);
       const fMaxPsi = toPsi(parseFloat($('frontMax').value) || 999, $('frontMaxUnit').value);
       const rMinPsi = toPsi(parseFloat($('rearMin').value) || 0, $('rearMinUnit').value);
       const rMaxPsi = toPsi(parseFloat($('rearMax').value) || 999, $('rearMaxUnit').value);
 
-      let fPsi = pressureFor(fLoad, fWidth, fWheel, tubeF, surfF, styleF);
-      let rPsi = pressureFor(rLoad, rWidth, rWheel, tubeF, surfF, styleF);
+      let fPsi = pressureFor(fLoad, fWidth, fRim, fWheel, tubeF, surfF, styleF, weatherF);
+      let rPsi = pressureFor(rLoad, rWidth, rRim, rWheel, tubeF, surfF, styleF, weatherF);
       const fIdeal = fPsi, rIdeal = rPsi;
+      const fEff = effectiveWidth(fWidth, fRim);
+      const rEff = effectiveWidth(rWidth, rRim);
 
       const notes = [];
       if (fPsi < fMinPsi) {
@@ -552,10 +589,10 @@
       $('resultsCard').style.display = '';
       $('frontPsi').textContent = fPsi.toFixed(0);
       $('frontBar').textContent = `${psiToBar(fPsi).toFixed(2)} bar` + (Math.abs(fPsi - fIdeal) > 0.5 ? ` · ideal ${fIdeal.toFixed(0)} psi` : '');
-      $('frontLoad').textContent = `Load on wheel ≈ ${fLoad.toFixed(1)} kg`;
+      $('frontLoad').textContent = `Load ≈ ${fLoad.toFixed(1)} kg · effective width ${fEff.toFixed(1)} mm`;
       $('rearPsi').textContent = rPsi.toFixed(0);
       $('rearBar').textContent = `${psiToBar(rPsi).toFixed(2)} bar` + (Math.abs(rPsi - rIdeal) > 0.5 ? ` · ideal ${rIdeal.toFixed(0)} psi` : '');
-      $('rearLoad').textContent = `Load on wheel ≈ ${rLoad.toFixed(1)} kg`;
+      $('rearLoad').textContent = `Load ≈ ${rLoad.toFixed(1)} kg · effective width ${rEff.toFixed(1)} mm`;
 
       const notesEl = $('notes');
       notesEl.innerHTML = notes.map(n => `<div class="notice">${n}</div>`).join('');
