@@ -1,109 +1,560 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GPX Splitter</title>
-</head>
-<body>
-  <input type="file" id="file" accept=".gpx" />
-  <input type="number" id="km" value="100" /> km
-  <button onclick="process()">Split</button>
-
-<script>
-const GPX_NS = "http://www.topografix.com/GPX/1/1";
-
-function haversine(a, b) {
-  const R = 6371e3;
-  const toRad = d => d * Math.PI / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLon = toRad(b.lon - a.lon);
-
-  const A = Math.sin(dLat/2)**2 +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) *
-    Math.sin(dLon/2)**2;
-
-  return 2 * R * Math.atan2(Math.sqrt(A), Math.sqrt(1-A));
-}
-
-function process() {
-  const file = document.getElementById('file').files[0];
-  const maxDist = document.getElementById('km').value * 1000;
-
-  const reader = new FileReader();
-  reader.onload = e => splitGPX(e.target.result, maxDist);
-  reader.readAsText(file);
-}
-
-function splitGPX(text, maxDist) {
-  const parser = new DOMParser();
-  const xml = parser.parseFromString(text, "application/xml");
-
-  const gpx = xml.documentElement;
-  const metadata = gpx.querySelector("metadata");
-  const pts = Array.from(xml.getElementsByTagName("trkpt"));
-
-  let segments = [];
-  let current = [pts[0]];
-  let dist = 0;
-
-  for (let i = 1; i < pts.length; i++) {
-    const a = pts[i-1];
-    const b = pts[i];
-
-    const d = haversine(
-      {lat: +a.getAttribute("lat"), lon: +a.getAttribute("lon")},
-      {lat: +b.getAttribute("lat"), lon: +b.getAttribute("lon")}
-    );
-
-    if (dist + d > maxDist) {
-      segments.push(current);
-      current = [];
-      dist = 0;
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GPX Splitter — Split a GPX track by distance</title>
+  <meta name="description" content="Split a large GPX track into smaller files by maximum distance. Runs entirely in your browser — no upload, no server.">
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e7eb;
+      --success: #059669;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
     }
 
-    current.push(b);
-    dist += d;
-  }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #3b82f6;
+        --accent-hover: #60a5fa;
+        --border: #334155;
+        --success: #10b981;
+        --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+    }
 
-  if (current.length) segments.push(current);
+    * { box-sizing: border-box; }
 
-  segments.forEach((seg, i) => downloadSegment(gpx, metadata, seg, i+1));
-}
+    body {
+      margin: 0;
+      padding: 1.5rem 1rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+    }
 
-function downloadSegment(originalGPX, metadata, pts, index) {
-  const doc = document.implementation.createDocument(GPX_NS, "gpx", null);
-  const gpx = doc.documentElement;
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+    }
 
-  // copy attributes (critical)
-  for (let attr of originalGPX.attributes) {
-    gpx.setAttribute(attr.name, attr.value);
-  }
+    header h1 {
+      margin: 0 0 0.25rem;
+      font-size: 1.75rem;
+    }
 
-  if (metadata) {
-    gpx.appendChild(doc.importNode(metadata, true));
-  }
+    header p {
+      margin: 0 0 1.5rem;
+      color: var(--muted);
+    }
 
-  const trk = doc.createElementNS(GPX_NS, "trk");
-  const seg = doc.createElementNS(GPX_NS, "trkseg");
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
 
-  pts.forEach(p => seg.appendChild(doc.importNode(p, true)));
+    .field {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+    }
 
-  trk.appendChild(seg);
-  gpx.appendChild(trk);
+    .field label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
 
-  const xml = new XMLSerializer().serializeToString(doc);
+    .field .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
 
-  const blob = new Blob(
-    ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + xml],
-    {type: "application/gpx+xml"}
-  );
+    input[type="file"],
+    input[type="number"] {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+    }
 
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `split_${index}.gpx`;
-  a.click();
-}
-</script>
+    input[type="number"] { max-width: 200px; }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.7rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      min-height: 44px;
+    }
+
+    button:hover:not(:disabled) { background: var(--accent-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    .stat {
+      background: var(--bg);
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .stat .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    .stat .value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 0.2rem;
+    }
+
+    .segments {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .segment {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.6rem;
+      background: var(--bg);
+    }
+
+    .segment-info {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .segment-name {
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .segment-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    a.download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
+      background: var(--success);
+      border-radius: 8px;
+      min-height: 40px;
+      white-space: nowrap;
+    }
+
+    a.download:hover { filter: brightness(1.05); }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .ios-note {
+      background: #fef3c7;
+      color: #78350f;
+      border: 1px solid #fde68a;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .ios-note {
+        background: #422006;
+        color: #fde68a;
+        border-color: #78350f;
+      }
+    }
+
+    .error {
+      color: #b91c1c;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-top: 0.75rem;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    footer a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>GPX Splitter</h1>
+      <p>Split a long GPX track into smaller files by maximum distance. Everything runs in your browser — your file is never uploaded.</p>
+    </header>
+
+    <section class="card">
+      <div class="field">
+        <label for="file">GPX file</label>
+        <input type="file" id="file" accept=".gpx,application/gpx+xml" />
+      </div>
+      <div class="field">
+        <label for="km">Maximum distance per segment</label>
+        <input type="number" id="km" value="100" min="0.1" step="0.1" />
+        <span class="hint">In kilometres. The track is cut whenever the running distance exceeds this value.</span>
+      </div>
+      <button id="splitBtn" onclick="process()">Split GPX</button>
+      <div id="error"></div>
+    </section>
+
+    <section id="summary" class="card" style="display:none;">
+      <h2 style="margin-top:0;">Source file</h2>
+      <div class="stats" id="sourceStats"></div>
+    </section>
+
+    <section id="resultsCard" class="card" style="display:none;">
+      <h2 style="margin-top:0;">Segments</h2>
+      <div id="iosNote" class="ios-note" style="display:none;">
+        On iPhone/iPad, tap each <strong>Download</strong> button below — Safari only allows one file per tap. Use <strong>Download all as ZIP</strong> to grab everything at once.
+      </div>
+      <div class="toolbar">
+        <button id="zipBtn" class="btn-secondary" onclick="downloadZip()">Download all as ZIP</button>
+      </div>
+      <ul class="segments" id="segments"></ul>
+    </section>
+
+    <footer>
+      Works offline after first load. Source on
+      <a href="https://github.com/billypchan/billypchan.github.io">GitHub</a>.
+    </footer>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const GPX_NS = "http://www.topografix.com/GPX/1/1";
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+    let lastSegments = [];
+
+    function haversine(a, b) {
+      const R = 6371e3;
+      const toRad = d => d * Math.PI / 180;
+      const dLat = toRad(b.lat - a.lat);
+      const dLon = toRad(b.lon - a.lon);
+      const A = Math.sin(dLat/2)**2 +
+        Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) *
+        Math.sin(dLon/2)**2;
+      return 2 * R * Math.atan2(Math.sqrt(A), Math.sqrt(1-A));
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.innerHTML = msg ? `<div class="error">${msg}</div>` : '';
+    }
+
+    function formatDistance(m) {
+      return (m / 1000).toFixed(2) + ' km';
+    }
+
+    function formatDate(d) {
+      if (!d) return '—';
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    }
+
+    function dateStamp(d) {
+      if (!d) return '';
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+    }
+
+    function sanitize(name) {
+      return name.replace(/\.gpx$/i, '').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(0, 60) || 'track';
+    }
+
+    function pointTime(pt) {
+      const t = pt.getElementsByTagName('time')[0];
+      if (!t) return null;
+      const d = new Date(t.textContent);
+      return isNaN(d) ? null : d;
+    }
+
+    function process() {
+      showError('');
+      const fileInput = document.getElementById('file');
+      const file = fileInput.files[0];
+      const km = parseFloat(document.getElementById('km').value);
+
+      if (!file) { showError('Please choose a GPX file.'); return; }
+      if (!km || km <= 0) { showError('Please enter a valid distance in km.'); return; }
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          splitGPX(e.target.result, km * 1000, file.name);
+        } catch (err) {
+          console.error(err);
+          showError('Could not parse this GPX file: ' + err.message);
+        }
+      };
+      reader.onerror = () => showError('Could not read the file.');
+      reader.readAsText(file);
+    }
+
+    function splitGPX(text, maxDist, originalName) {
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "application/xml");
+
+      const parseError = xml.getElementsByTagName('parsererror')[0];
+      if (parseError) throw new Error('Invalid XML');
+
+      const gpx = xml.documentElement;
+      const metadata = gpx.querySelector("metadata");
+      const pts = Array.from(xml.getElementsByTagName("trkpt"));
+
+      if (pts.length === 0) throw new Error('No <trkpt> elements found.');
+
+      let totalDist = 0;
+      for (let i = 1; i < pts.length; i++) {
+        totalDist += haversine(
+          {lat: +pts[i-1].getAttribute("lat"), lon: +pts[i-1].getAttribute("lon")},
+          {lat: +pts[i].getAttribute("lat"), lon: +pts[i].getAttribute("lon")}
+        );
+      }
+
+      const firstTime = pointTime(pts[0]);
+      const lastTime = pointTime(pts[pts.length-1]);
+
+      const segments = [];
+      let current = [pts[0]];
+      let dist = 0;
+      let segDist = 0;
+
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i-1];
+        const b = pts[i];
+        const d = haversine(
+          {lat: +a.getAttribute("lat"), lon: +a.getAttribute("lon")},
+          {lat: +b.getAttribute("lat"), lon: +b.getAttribute("lon")}
+        );
+
+        if (dist + d > maxDist) {
+          segments.push({pts: current, dist: segDist});
+          current = [];
+          dist = 0;
+          segDist = 0;
+        }
+
+        current.push(b);
+        dist += d;
+        segDist += d;
+      }
+      if (current.length) segments.push({pts: current, dist: segDist});
+
+      renderSummary({
+        name: originalName,
+        points: pts.length,
+        totalDist,
+        firstTime,
+        lastTime,
+        segmentCount: segments.length
+      });
+
+      const baseName = sanitize(originalName);
+      const stamp = dateStamp(firstTime);
+      const total = segments.length;
+
+      lastSegments = segments.map((s, i) => {
+        const idx = i + 1;
+        const sFirst = pointTime(s.pts[0]);
+        const sLast = pointTime(s.pts[s.pts.length-1]);
+        const km = (s.dist / 1000).toFixed(1);
+        const partLabel = `part${idx}of${total}`;
+        const stampPart = dateStamp(sFirst) || stamp;
+        const namePieces = [baseName, partLabel, `${km}km`];
+        if (stampPart) namePieces.splice(1, 0, stampPart);
+        const filename = namePieces.join('_') + '.gpx';
+
+        const xmlStr = buildSegmentXML(gpx, metadata, s.pts);
+        const blob = new Blob(
+          ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + xmlStr],
+          {type: "application/gpx+xml"}
+        );
+        return {
+          index: idx,
+          filename,
+          blob,
+          url: URL.createObjectURL(blob),
+          points: s.pts.length,
+          dist: s.dist,
+          firstTime: sFirst,
+          lastTime: sLast
+        };
+      });
+
+      renderSegments(lastSegments);
+    }
+
+    function buildSegmentXML(originalGPX, metadata, pts) {
+      const doc = document.implementation.createDocument(GPX_NS, "gpx", null);
+      const gpx = doc.documentElement;
+
+      for (let attr of originalGPX.attributes) {
+        gpx.setAttribute(attr.name, attr.value);
+      }
+
+      if (metadata) gpx.appendChild(doc.importNode(metadata, true));
+
+      const trk = doc.createElementNS(GPX_NS, "trk");
+      const seg = doc.createElementNS(GPX_NS, "trkseg");
+      pts.forEach(p => seg.appendChild(doc.importNode(p, true)));
+      trk.appendChild(seg);
+      gpx.appendChild(trk);
+
+      return new XMLSerializer().serializeToString(doc);
+    }
+
+    function renderSummary(s) {
+      document.getElementById('summary').style.display = '';
+      const range = (s.firstTime || s.lastTime)
+        ? `${formatDate(s.firstTime)} → ${formatDate(s.lastTime)}`
+        : '—';
+      document.getElementById('sourceStats').innerHTML = `
+        <div class="stat"><div class="label">File</div><div class="value" style="font-size:0.95rem;word-break:break-all;">${s.name}</div></div>
+        <div class="stat"><div class="label">Track points</div><div class="value">${s.points.toLocaleString()}</div></div>
+        <div class="stat"><div class="label">Total distance</div><div class="value">${formatDistance(s.totalDist)}</div></div>
+        <div class="stat"><div class="label">Date range</div><div class="value" style="font-size:0.95rem;">${range}</div></div>
+        <div class="stat"><div class="label">Segments</div><div class="value">${s.segmentCount}</div></div>
+      `;
+    }
+
+    function renderSegments(segments) {
+      document.getElementById('resultsCard').style.display = '';
+      document.getElementById('iosNote').style.display = isIOS ? '' : 'none';
+
+      const ul = document.getElementById('segments');
+      ul.innerHTML = '';
+      segments.forEach(s => {
+        const li = document.createElement('li');
+        li.className = 'segment';
+        const range = (s.firstTime || s.lastTime)
+          ? `${formatDate(s.firstTime)} → ${formatDate(s.lastTime)} · `
+          : '';
+        li.innerHTML = `
+          <div class="segment-info">
+            <div class="segment-name">${s.filename}</div>
+            <div class="segment-meta">${range}${s.points.toLocaleString()} pts · ${formatDistance(s.dist)}</div>
+          </div>
+        `;
+        const a = document.createElement('a');
+        a.className = 'download';
+        a.href = s.url;
+        a.download = s.filename;
+        a.textContent = 'Download';
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+
+    async function downloadZip() {
+      if (!lastSegments.length) return;
+      if (typeof JSZip === 'undefined') {
+        showError('ZIP library failed to load. Please use the individual download buttons.');
+        return;
+      }
+      const btn = document.getElementById('zipBtn');
+      btn.disabled = true;
+      const original = btn.textContent;
+      btn.textContent = 'Building ZIP…';
+      try {
+        const zip = new JSZip();
+        for (const s of lastSegments) {
+          zip.file(s.filename, s.blob);
+        }
+        const baseName = sanitize(document.getElementById('file').files[0]?.name || 'gpx_split');
+        const blob = await zip.generateAsync({type: 'blob'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${baseName}_split_${lastSegments.length}parts.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch (err) {
+        console.error(err);
+        showError('Could not build ZIP: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+      }
+    }
+  </script>
 </body>
 </html>
