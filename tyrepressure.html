@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recumbent Tyre Pressure Calculator</title>
+  <meta name="description" content="Tyre pressure calculator tuned for recumbent bicycles. Supports 700c, 650c, 559, 451, 406 and 349 wheels, TPU/latex/tubeless setups, and respects manufacturer min/max pressures.">
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e5e7eb;
+      --success: #059669;
+      --warn-bg: #fef3c7;
+      --warn-text: #78350f;
+      --warn-border: #fde68a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #3b82f6;
+        --accent-hover: #60a5fa;
+        --border: #334155;
+        --success: #10b981;
+        --warn-bg: #422006;
+        --warn-text: #fde68a;
+        --warn-border: #78350f;
+        --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 1.5rem 1rem 3rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    main { max-width: 760px; margin: 0 auto; }
+
+    header h1 { margin: 0 0 0.25rem; font-size: 1.75rem; }
+    header p { margin: 0 0 1.5rem; color: var(--muted); }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    h2 { margin: 0 0 1rem; font-size: 1.15rem; }
+    h3 { margin: 1rem 0 0.5rem; font-size: 1rem; color: var(--muted); font-weight: 600; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem 1rem;
+    }
+    @media (max-width: 540px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .field { display: flex; flex-direction: column; }
+
+    .field label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .field .hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 42px;
+    }
+
+    .row-with-unit {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .row-with-unit input { flex: 1; }
+    .row-with-unit select { width: auto; max-width: 90px; }
+
+    .toggle-group {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .toggle-group button {
+      flex: 1;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      cursor: pointer;
+      min-height: 36px;
+    }
+    .toggle-group button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button.primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      min-height: 46px;
+      width: 100%;
+    }
+    button.primary:hover { background: var(--accent-hover); }
+
+    .results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+    @media (max-width: 540px) {
+      .results { grid-template-columns: 1fr; }
+    }
+
+    .result {
+      background: var(--bg);
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .result .which {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .result .psi {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--success);
+      margin: 0.2rem 0 0;
+      line-height: 1;
+    }
+    .result .psi-unit {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-left: 0.2rem;
+    }
+    .result .bar {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+    .result .load {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .notice {
+      padding: 0.75rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-top: 0.75rem;
+      background: var(--warn-bg);
+      color: var(--warn-text);
+      border: 1px solid var(--warn-border);
+    }
+
+    details {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    details p, details ul {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    details a { color: var(--accent); }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent); }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+    .pill-row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: var(--bg);
+      font-weight: 500;
+    }
+    .pill-row input { display: none; }
+    .pill-row input:checked + span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .pill-row label:has(input:checked) {
+      border-color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Recumbent Tyre Pressure Calculator</h1>
+      <p>Tuned for recumbents, mixed wheel sizes (700c, 650c, 559, 451, 406, 349), TPU/latex/tubeless setups, and manufacturer min/max limits. Inspired by the SRAM AXS and Vittoria calculators.</p>
+    </header>
+
+    <section class="card">
+      <h2>Rider &amp; Bike</h2>
+      <div class="grid-2">
+        <div class="field">
+          <label>Rider weight</label>
+          <div class="row-with-unit">
+            <input type="number" id="riderWeight" value="75" min="20" step="0.5">
+            <select id="weightUnit">
+              <option value="kg">kg</option>
+              <option value="lb">lb</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Bike weight (incl. usual gear)</label>
+          <input type="number" id="bikeWeight" value="14" min="3" step="0.5">
+          <span class="hint">Same unit as rider weight.</span>
+        </div>
+        <div class="field">
+          <label>Cargo / panniers (optional)</label>
+          <input type="number" id="cargoWeight" value="0" min="0" step="0.5">
+        </div>
+        <div class="field">
+          <label>Weight distribution (front / rear)</label>
+          <select id="distribution">
+            <option value="0.45">Short wheelbase / highracer (45 / 55)</option>
+            <option value="0.40" selected>Mid wheelbase (40 / 60)</option>
+            <option value="0.35">Long wheelbase / LWB (35 / 65)</option>
+            <option value="0.30">Heavily loaded LWB (30 / 70)</option>
+            <option value="custom">Custom…</option>
+          </select>
+          <div id="customDistRow" style="display:none; margin-top:0.4rem;">
+            <input type="number" id="customDist" value="40" min="20" max="60" step="1">
+            <span class="hint">% of weight on the front wheel.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Front Wheel</h2>
+      <div class="grid-2">
+        <div class="field">
+          <label>Wheel size (ETRTO)</label>
+          <select id="frontWheel">
+            <option value="622">700c (622)</option>
+            <option value="584">650b (584)</option>
+            <option value="571">650c (571)</option>
+            <option value="559">26" MTB (559)</option>
+            <option value="451" selected>20" 451</option>
+            <option value="406">20" 406</option>
+            <option value="349">16" 349 (Brompton)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tyre width (mm)</label>
+          <input type="number" id="frontWidth" value="28" min="18" max="80" step="1">
+        </div>
+        <div class="field">
+          <label>Min pressure (sidewall)</label>
+          <div class="row-with-unit">
+            <input type="number" id="frontMin" value="85" min="0" step="1">
+            <select id="frontMinUnit">
+              <option value="psi">psi</option>
+              <option value="bar">bar</option>
+            </select>
+          </div>
+          <span class="hint">e.g. Schwalbe One: 85 psi.</span>
+        </div>
+        <div class="field">
+          <label>Max pressure (sidewall)</label>
+          <div class="row-with-unit">
+            <input type="number" id="frontMax" value="130" min="0" step="1">
+            <select id="frontMaxUnit">
+              <option value="psi">psi</option>
+              <option value="bar">bar</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Rear Wheel</h2>
+      <div class="grid-2">
+        <div class="field">
+          <label>Wheel size (ETRTO)</label>
+          <select id="rearWheel">
+            <option value="622" selected>700c (622)</option>
+            <option value="584">650b (584)</option>
+            <option value="571">650c (571)</option>
+            <option value="559">26" MTB (559)</option>
+            <option value="451">20" 451</option>
+            <option value="406">20" 406</option>
+            <option value="349">16" 349 (Brompton)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tyre width (mm)</label>
+          <input type="number" id="rearWidth" value="32" min="18" max="80" step="1">
+        </div>
+        <div class="field">
+          <label>Min pressure (sidewall)</label>
+          <div class="row-with-unit">
+            <input type="number" id="rearMin" value="70" min="0" step="1">
+            <select id="rearMinUnit">
+              <option value="psi">psi</option>
+              <option value="bar">bar</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Max pressure (sidewall)</label>
+          <div class="row-with-unit">
+            <input type="number" id="rearMax" value="115" min="0" step="1">
+            <select id="rearMaxUnit">
+              <option value="psi">psi</option>
+              <option value="bar">bar</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Setup &amp; Conditions</h2>
+      <div class="field">
+        <label>Inner tube / casing</label>
+        <div class="pill-row">
+          <label><input type="radio" name="tube" value="butyl"><span>Butyl tube</span></label>
+          <label><input type="radio" name="tube" value="latex"><span>Latex tube</span></label>
+          <label><input type="radio" name="tube" value="tpu" checked><span>TPU tube</span></label>
+          <label><input type="radio" name="tube" value="tubeless"><span>Tubeless</span></label>
+        </div>
+      </div>
+      <div class="field" style="margin-top: 0.75rem;">
+        <label>Road surface</label>
+        <div class="pill-row">
+          <label><input type="radio" name="surface" value="smooth"><span>Smooth tarmac</span></label>
+          <label><input type="radio" name="surface" value="mixed" checked><span>Mixed road</span></label>
+          <label><input type="radio" name="surface" value="rough"><span>Rough chipseal</span></label>
+          <label><input type="radio" name="surface" value="gravel"><span>Gravel / path</span></label>
+        </div>
+      </div>
+      <div class="field" style="margin-top: 0.75rem;">
+        <label>Riding style</label>
+        <div class="pill-row">
+          <label><input type="radio" name="style" value="comfort"><span>Comfort</span></label>
+          <label><input type="radio" name="style" value="balanced" checked><span>Balanced</span></label>
+          <label><input type="radio" name="style" value="performance"><span>Performance</span></label>
+        </div>
+      </div>
+    </section>
+
+    <button class="primary" onclick="calculate()">Calculate</button>
+
+    <section id="resultsCard" class="card" style="display:none; margin-top:1rem;">
+      <h2>Recommended pressures</h2>
+      <div class="results">
+        <div class="result">
+          <div class="which">Front</div>
+          <div><span class="psi" id="frontPsi">—</span><span class="psi-unit">psi</span></div>
+          <div class="bar" id="frontBar">— bar</div>
+          <div class="load" id="frontLoad"></div>
+        </div>
+        <div class="result">
+          <div class="which">Rear</div>
+          <div><span class="psi" id="rearPsi">—</span><span class="psi-unit">psi</span></div>
+          <div class="bar" id="rearBar">— bar</div>
+          <div class="load" id="rearLoad"></div>
+        </div>
+      </div>
+      <div id="notes"></div>
+    </section>
+
+    <details>
+      <summary>How does this calculator work?</summary>
+      <p>The base pressure follows the Berto / Bicycle Quarterly “15 % tyre drop” rule:</p>
+      <p style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; background:var(--card); padding:0.5rem; border-radius:6px;">
+        P<sub>psi</sub> ≈ 2.0 × Load<sub>kg</sub> × (25 / width<sub>mm</sub>)<sup>1.5</sup>
+      </p>
+      <p>That base is multiplied by:</p>
+      <ul style="padding-left:1.2rem;">
+        <li><strong>Wheel size factor</strong> — smaller wheels (451, 406, 349) need slightly higher pressure to keep the same percentage drop, because the contact patch geometry changes.</li>
+        <li><strong>Tube / casing factor</strong> — tubeless and TPU lose less energy at lower pressure, so they're run a bit softer (TPU −4 %, latex −3 %, tubeless −8 %).</li>
+        <li><strong>Surface factor</strong> — rougher roads roll faster at lower pressures (down to −15 % on gravel).</li>
+        <li><strong>Style factor</strong> — comfort −7 %, performance +5 %.</li>
+      </ul>
+      <p>Recumbents put more weight on the rear wheel than uprights — typically 60–70 %. The presets cover common short-, mid-, and long-wheelbase layouts, plus a custom value.</p>
+      <p>The result is finally clamped to the sidewall min / max you enter (e.g. Schwalbe One min 85 psi). If the calculated value is outside the safe range, you'll see a warning.</p>
+      <p>References: <a href="https://axs.sram.com/guides/tire/pressure" target="_blank" rel="noopener">SRAM AXS Tyre Pressure Guide</a>, <a href="https://int.vittoria.com/pages/tire-pressure" target="_blank" rel="noopener">Vittoria Tyre Pressure Calculator</a>.</p>
+    </details>
+
+    <footer>
+      Pressures are a starting point — adjust by feel. Lower pressure is generally faster on real-world roads, until the tyre starts squirming or pinch-flatting.
+    </footer>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    const WHEEL_FACTOR = {
+      622: 1.00, 584: 1.02, 571: 1.03, 559: 1.04,
+      451: 1.09, 406: 1.13, 349: 1.18
+    };
+    const TUBE_FACTOR = { butyl: 1.00, latex: 0.97, tpu: 0.96, tubeless: 0.92 };
+    const SURFACE_FACTOR = { smooth: 1.00, mixed: 0.95, rough: 0.90, gravel: 0.85 };
+    const STYLE_FACTOR = { comfort: 0.93, balanced: 1.00, performance: 1.05 };
+
+    function radio(name) {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : null;
+    }
+
+    function toKg(v, unit) { return unit === 'lb' ? v * 0.453592 : v; }
+    function toPsi(v, unit) { return unit === 'bar' ? v * 14.5038 : v; }
+    function psiToBar(p) { return p / 14.5038; }
+
+    $('distribution').addEventListener('change', e => {
+      $('customDistRow').style.display = e.target.value === 'custom' ? '' : 'none';
+    });
+
+    function frontShare() {
+      const v = $('distribution').value;
+      if (v === 'custom') {
+        const c = parseFloat($('customDist').value);
+        return Math.max(0.2, Math.min(0.6, (isNaN(c) ? 40 : c) / 100));
+      }
+      return parseFloat(v);
+    }
+
+    function pressureFor(loadKg, widthMm, wheelEtrto, tubeF, surfF, styleF) {
+      const wheelF = WHEEL_FACTOR[wheelEtrto] ?? 1.0;
+      const base = 2.0 * loadKg * Math.pow(25 / widthMm, 1.5);
+      return base * wheelF * tubeF * surfF * styleF;
+    }
+
+    function calculate() {
+      const unit = $('weightUnit').value;
+      const rider = toKg(parseFloat($('riderWeight').value) || 0, unit);
+      const bike = toKg(parseFloat($('bikeWeight').value) || 0, unit);
+      const cargo = toKg(parseFloat($('cargoWeight').value) || 0, unit);
+      const total = rider + bike + cargo;
+      if (total <= 0) return;
+
+      const fShare = frontShare();
+      const fLoad = total * fShare;
+      const rLoad = total * (1 - fShare);
+
+      const tubeF = TUBE_FACTOR[radio('tube')] ?? 1.0;
+      const surfF = SURFACE_FACTOR[radio('surface')] ?? 1.0;
+      const styleF = STYLE_FACTOR[radio('style')] ?? 1.0;
+
+      const fWheel = parseInt($('frontWheel').value, 10);
+      const rWheel = parseInt($('rearWheel').value, 10);
+      const fWidth = parseFloat($('frontWidth').value) || 28;
+      const rWidth = parseFloat($('rearWidth').value) || 32;
+
+      const fMinPsi = toPsi(parseFloat($('frontMin').value) || 0, $('frontMinUnit').value);
+      const fMaxPsi = toPsi(parseFloat($('frontMax').value) || 999, $('frontMaxUnit').value);
+      const rMinPsi = toPsi(parseFloat($('rearMin').value) || 0, $('rearMinUnit').value);
+      const rMaxPsi = toPsi(parseFloat($('rearMax').value) || 999, $('rearMaxUnit').value);
+
+      let fPsi = pressureFor(fLoad, fWidth, fWheel, tubeF, surfF, styleF);
+      let rPsi = pressureFor(rLoad, rWidth, rWheel, tubeF, surfF, styleF);
+      const fIdeal = fPsi, rIdeal = rPsi;
+
+      const notes = [];
+      if (fPsi < fMinPsi) {
+        notes.push(`Front: calculated ${fPsi.toFixed(0)} psi is below the manufacturer minimum (${fMinPsi.toFixed(0)} psi). Raised to the minimum — consider a wider tyre for better comfort at this load.`);
+        fPsi = fMinPsi;
+      } else if (fPsi > fMaxPsi) {
+        notes.push(`Front: calculated ${fPsi.toFixed(0)} psi exceeds the manufacturer maximum (${fMaxPsi.toFixed(0)} psi). Capped — consider a narrower tyre or check the load.`);
+        fPsi = fMaxPsi;
+      }
+      if (rPsi < rMinPsi) {
+        notes.push(`Rear: calculated ${rPsi.toFixed(0)} psi is below the manufacturer minimum (${rMinPsi.toFixed(0)} psi). Raised to the minimum — consider a wider tyre for better comfort at this load.`);
+        rPsi = rMinPsi;
+      } else if (rPsi > rMaxPsi) {
+        notes.push(`Rear: calculated ${rPsi.toFixed(0)} psi exceeds the manufacturer maximum (${rMaxPsi.toFixed(0)} psi). Capped — a higher load-rated tyre is recommended.`);
+        rPsi = rMaxPsi;
+      }
+
+      $('resultsCard').style.display = '';
+      $('frontPsi').textContent = fPsi.toFixed(0);
+      $('frontBar').textContent = `${psiToBar(fPsi).toFixed(2)} bar` + (Math.abs(fPsi - fIdeal) > 0.5 ? ` · ideal ${fIdeal.toFixed(0)} psi` : '');
+      $('frontLoad').textContent = `Load on wheel ≈ ${fLoad.toFixed(1)} kg`;
+      $('rearPsi').textContent = rPsi.toFixed(0);
+      $('rearBar').textContent = `${psiToBar(rPsi).toFixed(2)} bar` + (Math.abs(rPsi - rIdeal) > 0.5 ? ` · ideal ${rIdeal.toFixed(0)} psi` : '');
+      $('rearLoad').textContent = `Load on wheel ≈ ${rLoad.toFixed(1)} kg`;
+
+      const notesEl = $('notes');
+      notesEl.innerHTML = notes.map(n => `<div class="notice">${n}</div>`).join('');
+    }
+  </script>
+</body>
+</html>
