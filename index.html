@@ -266,6 +266,80 @@
     }
     .about-links a:hover { opacity: .7; }
 
+    /* ── HERO COFFEE ── */
+    .hero-cta {
+      margin-top: 28px;
+      display: flex; justify-content: center;
+    }
+    .btn-coffee {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 20px; border-radius: 980px;
+      font-size: 14px; font-weight: 600;
+      text-decoration: none; color: #1d1d1f;
+      background: #FFDD00;
+      box-shadow: 0 4px 12px rgba(0,0,0,.08);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-coffee:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.14); }
+    .btn-coffee .coffee-emoji { font-size: 16px; }
+
+    /* ── LAB SECTION ── */
+    .lab {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .lab-inner {
+      max-width: var(--max-w); margin: 0 auto;
+      padding: 72px 24px 80px;
+    }
+    .lab-header {
+      text-align: center; margin-bottom: 40px;
+    }
+    .lab-eyebrow {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--secondary); margin-bottom: 10px;
+    }
+    .lab-header h2 {
+      font-size: 28px; font-weight: 700; letter-spacing: -.02em;
+      margin-bottom: 10px;
+    }
+    .lab-header p {
+      font-size: 15px; color: var(--secondary);
+      max-width: 480px; margin: 0 auto; line-height: 1.6;
+    }
+    .lab-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    .lab-card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px 24px;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+      transition: transform .15s, box-shadow .15s, border-color .15s;
+    }
+    .lab-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0,0,0,.08);
+      border-color: #b8b8c0;
+    }
+    .lab-card-icon {
+      font-size: 28px; margin-bottom: 14px; line-height: 1;
+    }
+    .lab-card h3 {
+      font-size: 17px; font-weight: 700; letter-spacing: -.01em;
+      margin-bottom: 6px;
+    }
+    .lab-card-desc {
+      font-size: 14px; color: var(--secondary);
+      line-height: 1.55; margin-bottom: 18px; flex: 1;
+    }
+    .lab-card-link {
+      font-size: 13px; font-weight: 600;
+      color: var(--accent-berlin);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+
     footer {
       border-top: 1px solid var(--border);
       padding: 24px; text-align: center;
@@ -341,6 +415,8 @@
       .nav-links { display: none; }
       .screenshot-frame { width: 88px; }
       .watch-frame { width: 64px; }
+      .lab-grid { grid-template-columns: 1fr; }
+      .lab-inner { padding: 56px 24px 64px; }
     }
   </style>
 </head>
@@ -361,6 +437,7 @@
         <li><a href="#youbike">YouBike</a></li>
         <li><a href="#berlin">BB Timetable</a></li>
         <li><a href="#iching">周易占卜</a></li>
+        <li><a href="#lab" data-i18n="nav.lab">Lab</a></li>
         <li><a href="#about" data-i18n="nav.about">About</a></li>
       </ul>
       <div class="lang-switcher">
@@ -390,6 +467,12 @@
   </div>
   <h1 data-i18n="hero.title">Three apps.<br>One developer.</h1>
   <p data-i18n="hero.subtitle">Transit in Taiwan. Transit in Berlin. Ancient wisdom, anywhere. All made for the wrist.</p>
+  <div class="hero-cta">
+    <a class="btn-coffee" href="https://buymeacoffee.com/billchan" target="_blank" rel="noopener">
+      <span class="coffee-emoji">☕</span>
+      <span data-i18n="cta.coffee">Buy me a coffee</span>
+    </a>
+  </div>
 </section>
 
 <!-- APPS -->
@@ -689,6 +772,31 @@
 
 </div>
 
+<!-- LAB -->
+<section class="lab" id="lab">
+  <div class="lab-inner">
+    <div class="lab-header">
+      <div class="lab-eyebrow" data-i18n="lab.eyebrow">Lab</div>
+      <h2 data-i18n="lab.title">Small web tools</h2>
+      <p data-i18n="lab.body">Side projects that solve one problem well. No accounts, no uploads — everything runs in your browser.</p>
+    </div>
+    <div class="lab-grid">
+      <a class="lab-card" href="tyrepressure.html">
+        <div class="lab-card-icon">🚴</div>
+        <h3 data-i18n="lab.tyre.name">Recumbent Tyre Pressure</h3>
+        <p class="lab-card-desc" data-i18n="lab.tyre.desc">Calculator tuned for recumbents — mixed wheel sizes (700c, 451, 406…), TPU/tubeless casings, rim width, weather, and manufacturer min/max limits.</p>
+        <span class="lab-card-link"><span data-i18n="lab.open">Open</span> →</span>
+      </a>
+      <a class="lab-card" href="gpsspliter.html">
+        <div class="lab-card-icon">🗺️</div>
+        <h3 data-i18n="lab.gpx.name">GPX Splitter</h3>
+        <p class="lab-card-desc" data-i18n="lab.gpx.desc">Split a long GPX track into smaller files by distance. Per-segment downloads or a single ZIP — works on iPhone.</p>
+        <span class="lab-card-link"><span data-i18n="lab.open">Open</span> →</span>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- ABOUT -->
 <section class="about" id="about">
   <div class="about-inner">
@@ -707,12 +815,16 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
         <span data-i18n="about.contact">Contact</span>
       </a>
+      <a href="https://buymeacoffee.com/billchan" target="_blank" rel="noopener">
+        <span aria-hidden="true" style="font-size:15px;">☕</span>
+        <span data-i18n="cta.coffee">Buy me a coffee</span>
+      </a>
     </div>
   </div>
 </section>
 
 <footer>
-  <p>© 2026 Bill Chan · <a href="https://github.com/billypchan/">GitHub</a> · <a href="/privacy">Privacy</a></p>
+  <p>© 2026 Bill Chan · <a href="https://github.com/billypchan/">GitHub</a> · <a href="https://buymeacoffee.com/billchan" target="_blank" rel="noopener">☕ Buy me a coffee</a> · <a href="/privacy">Privacy</a></p>
 </footer>
 
 <script>
@@ -720,6 +832,7 @@ const i18n = {
   en: {
     "nav.title": "Apps by Bill Chan",
     "nav.about": "About",
+    "nav.lab": "Lab",
     "hero.eyebrow": "Apple Watch · iPhone · Android",
     "hero.title": "Three apps.<br>One developer.",
     "hero.subtitle": "Transit in Taiwan. Transit in Berlin. Ancient wisdom, anywhere. All made for the wrist.",
@@ -753,6 +866,15 @@ const i18n = {
     "iching.f5.name": "Companion Hexagrams", "iching.f5.desc": "錯卦 and 綜卦 calculated automatically. One tap to navigate.",
     "iching.f6.name": "Reading Record", "iching.f6.desc": "Date, time, and location saved for every divination.",
     "cta.appstore": "Download on the App Store",
+    "cta.coffee": "Buy me a coffee",
+    "lab.eyebrow": "Lab",
+    "lab.title": "Small web tools",
+    "lab.body": "Side projects that solve one problem well. No accounts, no uploads — everything runs in your browser.",
+    "lab.open": "Open",
+    "lab.tyre.name": "Recumbent Tyre Pressure",
+    "lab.tyre.desc": "Calculator tuned for recumbents — mixed wheel sizes (700c, 451, 406…), TPU/tubeless casings, rim width, weather, and manufacturer min/max limits.",
+    "lab.gpx.name": "GPX Splitter",
+    "lab.gpx.desc": "Split a long GPX track into smaller files by distance. Per-segment downloads or a single ZIP — works on iPhone.",
     "about.title": "Built by Bill Chan",
     "about.body": "Independent developer making transit on Apple Watch feel like it was always supposed to be there.",
     "about.contact": "Contact",
@@ -761,6 +883,7 @@ const i18n = {
   zh: {
     "nav.title": "Bill Chan 的 Apps",
     "nav.about": "關於",
+    "nav.lab": "實驗室",
     "hero.eyebrow": "Apple Watch · iPhone · Android",
     "hero.title": "三款應用，<br>一位開發者。",
     "hero.subtitle": "台灣騎車、柏林搭車、隨時起卦。為手腕而生。",
@@ -794,6 +917,15 @@ const i18n = {
     "iching.f5.name": "錯卦・綜卦", "iching.f5.desc": "自動計算錯卦與綜卦，前後卦一鍵導覽。",
     "iching.f6.name": "占問記錄", "iching.f6.desc": "記錄每次占卜的日期、時間與所在地點。",
     "cta.appstore": "在 App Store 下載",
+    "cta.coffee": "請我喝杯咖啡",
+    "lab.eyebrow": "實驗室",
+    "lab.title": "小工具",
+    "lab.body": "解決單一問題的小型網頁工具。不需註冊、不需上傳，全部在瀏覽器中執行。",
+    "lab.open": "開啟",
+    "lab.tyre.name": "臥車胎壓計算器",
+    "lab.tyre.desc": "為臥式自行車設計：支援前後不同輪徑（700c、451、406…）、TPU／無內胎、輪框內寬、天氣，並遵守原廠最高／最低胎壓。",
+    "lab.gpx.name": "GPX 分段工具",
+    "lab.gpx.desc": "依距離將長 GPX 軌跡切成多個小檔。可逐段下載或合併成 ZIP——在 iPhone 上也能用。",
     "about.title": "開發者：Bill Chan",
     "about.body": "獨立開發者，致力於讓 Apple Watch 上的交通體驗，回歸它本來應有的樣子。",
     "about.contact": "聯絡我",
@@ -802,6 +934,7 @@ const i18n = {
   de: {
     "nav.title": "Apps von Bill Chan",
     "nav.about": "Über",
+    "nav.lab": "Labor",
     "hero.eyebrow": "Apple Watch · iPhone · Android",
     "hero.title": "Drei Apps.<br>Ein Entwickler.",
     "hero.subtitle": "Fahrrad in Taiwan. Zug in Berlin. I Ging überall. Fürs Handgelenk gemacht.",
@@ -835,6 +968,15 @@ const i18n = {
     "iching.f5.name": "Begleit-Hexagramme", "iching.f5.desc": "錯卦 und 綜卦 automatisch berechnet. Ein Tipp zur Navigation.",
     "iching.f6.name": "Lese-Protokoll", "iching.f6.desc": "Datum, Uhrzeit und Ort jeder Orakel-Sitzung gespeichert.",
     "cta.appstore": "Im App Store laden",
+    "cta.coffee": "Spendier mir einen Kaffee",
+    "lab.eyebrow": "Labor",
+    "lab.title": "Kleine Web-Tools",
+    "lab.body": "Nebenprojekte, die ein Problem gut lösen. Kein Konto, kein Upload — alles läuft im Browser.",
+    "lab.open": "Öffnen",
+    "lab.tyre.name": "Reifendruck für Liegeräder",
+    "lab.tyre.desc": "Rechner für Liegeräder — gemischte Laufradgrößen (700c, 451, 406…), TPU/Tubeless, Felgeninnenbreite, Wetter und Hersteller-Mindest-/Höchstdruck.",
+    "lab.gpx.name": "GPX-Splitter",
+    "lab.gpx.desc": "Lange GPX-Tracks nach Distanz in kleinere Dateien aufteilen. Einzeln herunterladen oder als ZIP — funktioniert auch auf dem iPhone.",
     "about.title": "Entwickelt von Bill Chan",
     "about.body": "Unabhängiger Entwickler — macht Transit auf der Apple Watch so, wie es sich immer angefühlt haben sollte.",
     "about.contact": "Kontakt",
