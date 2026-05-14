@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — YouBike Nearby</title>
+  <meta name="description" content="Privacy policy for YouBike Nearby, the Taiwan YouBike station finder for Apple Watch and iPhone." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --surface: #f5f5f7;
+      --border: #d2d2d7;
+      --text: #1d1d1f;
+      --secondary: #6e6e73;
+      --accent: #28a745;
+      --max-w: 960px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-size: 15px; font-weight: 600;
+      color: var(--text); text-decoration: none; letter-spacing: -0.2px;
+    }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a {
+      font-size: 14px; color: var(--secondary);
+      text-decoration: none; transition: color .15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── PAGE ── */
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 64px 24px 96px;
+    }
+
+    .page-eyebrow {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+    }
+
+    .page h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 700; letter-spacing: -.02em; line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .page-meta {
+      font-size: 14px; color: var(--secondary);
+      margin-bottom: 48px;
+    }
+
+    .page h2 {
+      font-size: 20px; font-weight: 700;
+      letter-spacing: -.01em;
+      margin-top: 48px; margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page p {
+      font-size: 16px; line-height: 1.7;
+      color: #3a3a3f;
+      margin-bottom: 14px;
+    }
+
+    .page ul {
+      margin: 0 0 14px 0;
+      padding-left: 20px;
+    }
+
+    .page ul li {
+      font-size: 16px; line-height: 1.7;
+      color: #3a3a3f;
+      margin-bottom: 8px;
+    }
+
+    .page a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .page a:hover { text-decoration: underline; }
+
+    .data-card {
+      background: var(--surface);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+    .data-card-title {
+      font-size: 15px; font-weight: 600;
+      color: var(--text); margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .data-card-title .badge {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
+      background: rgba(0,0,0,.07); color: var(--secondary);
+    }
+    .data-card p {
+      font-size: 14px; margin-bottom: 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px; text-align: center;
+    }
+    footer p { font-size: 13px; color: var(--secondary); }
+    footer a { color: inherit; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Apps by Bill Chan</a>
+    <ul class="nav-links">
+      <li><a href="/#youbike">YouBike</a></li>
+      <li><a href="/#berlin">BB Timetable</a></li>
+      <li><a href="/#about">About</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+  <p class="page-eyebrow">YouBike Nearby</p>
+  <h1>Privacy Policy</h1>
+  <p class="page-meta">Last updated: May 11, 2026 &nbsp;·&nbsp; Applies to the iOS and watchOS app (bundle ID: <code>com.billchan.youbike</code>)</p>
+
+  <!-- 1. Introduction -->
+  <h2>Introduction</h2>
+  <p>YouBike Nearby is a Taiwan YouBike bike-share station finder for Apple Watch and iPhone, built by Bill Chan as an independent developer. This page explains what data the app touches, why, and what choices you have.</p>
+  <p>The short version: most data never leaves your device. The only data sent to external servers is station availability queries to public transit APIs, and — if you allow it — ad-related identifiers handled by Google AdMob.</p>
+
+  <!-- 2. Data We Collect -->
+  <h2>Data We Collect</h2>
+
+  <div class="data-card">
+    <div class="data-card-title">Location <span class="badge">On-device only</span></div>
+    <p>CoreLocation (when-in-use) is used to find stations near you, calculate distance and bearing, and power widgets. Your location is never sent to servers we control — it stays on your device and is used only to compute what to show you.</p>
+  </div>
+
+  <div class="data-card">
+    <div class="data-card-title">Contacts <span class="badge">On-device only</span></div>
+    <p>You can optionally pick a contact's address as a journey destination. The address is read on-device at the moment you select it and is not stored or transmitted anywhere.</p>
+  </div>
+
+  <div class="data-card">
+    <div class="data-card-title">Bookmarks via iCloud <span class="badge">Your iCloud account</span></div>
+    <p>Favorite stations are saved using CloudKit (container <code>iCloud.com.billchan.youbike</code>) so they sync across your own devices. This data lives in your personal iCloud account — we don't have access to it and can't read or modify it.</p>
+  </div>
+
+  <div class="data-card">
+    <div class="data-card-title">Station availability queries <span class="badge">Third-party transit APIs</span></div>
+    <p>The app fetches live bike availability from Taiwan's TDX (Transport Data eXchange) and Taipei Open Data endpoints. Requests include the city and station parameters needed to retrieve data. No personal identifiers are included.</p>
+  </div>
+
+  <div class="data-card">
+    <div class="data-card-title">Advertising identifier <span class="badge">Google AdMob · Optional</span></div>
+    <p>The free version of the iOS app shows banner ads served by Google AdMob. If you grant App Tracking Transparency (ATT) permission, AdMob may collect your Advertising Identifier (IDFA) along with standard device and network metadata for ad personalisation and measurement. If you decline ATT, AdMob still serves ads but without your IDFA. You can remove all ads with a one-time in-app purchase.</p>
+  </div>
+
+  <p>We collect no analytics beyond Apple's standard, anonymised App Store Connect aggregates (installs, crashes). No name, email, phone number, photos, or payment details are collected by us.</p>
+
+  <!-- 3. How We Use Data -->
+  <h2>How We Use Data</h2>
+  <ul>
+    <li><strong>Location</strong> — sort stations by distance, point the compass arrow, update widgets with nearby availability.</li>
+    <li><strong>Contacts</strong> — resolve an address you chose as a route destination, then discard it.</li>
+    <li><strong>iCloud bookmarks</strong> — sync your saved stations across iPhone, Apple Watch, and widgets.</li>
+    <li><strong>Transit API queries</strong> — display real-time bike and dock counts for stations in your city.</li>
+    <li><strong>Ad identifier</strong> — delivered to Google AdMob solely for ad serving; we don't use it ourselves.</li>
+  </ul>
+
+  <!-- 4. Third-Party Services -->
+  <h2>Third-Party Services</h2>
+  <ul>
+    <li>
+      <strong>Google AdMob</strong> — provides banner ads in the free iOS app. Google's data practices are governed by the
+      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy Policy</a>.
+    </li>
+    <li>
+      <strong>Apple iCloud / CloudKit</strong> — stores and syncs your bookmarks under your own Apple ID. Apple's data practices are governed by the
+      <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple Privacy Policy</a> and
+      <a href="https://www.apple.com/legal/internet-services/icloud/" target="_blank" rel="noopener">iCloud Terms and Conditions</a>.
+    </li>
+    <li>
+      <strong>TDX (Transport Data eXchange)</strong> — Taiwan government transit API providing station availability data.
+    </li>
+    <li>
+      <strong>Taipei Open Data</strong> — city-operated API, an alternative data source for Taipei stations.
+    </li>
+  </ul>
+
+  <!-- 5. Your Choices -->
+  <h2>Your Choices</h2>
+  <ul>
+    <li><strong>Location</strong> — grant or revoke the "While Using the App" permission in Settings → Privacy &amp; Security → Location Services. Revoking it means the app can't sort by distance or show the compass arrow, but browsing by city still works.</li>
+    <li><strong>App Tracking Transparency</strong> — when prompted, you can deny the ATT request. AdMob will still show ads but without your IDFA. You can also change this later in Settings → Privacy &amp; Security → Tracking.</li>
+    <li><strong>Remove Ads</strong> — a one-time in-app purchase removes all banner ads and stops AdMob from loading entirely for your session.</li>
+    <li><strong>iCloud sync</strong> — you can disable iCloud Drive for YouBike Nearby in Settings → <em>your name</em> → iCloud → Apps Using iCloud. Bookmarks will still work locally but won't sync across devices.</li>
+    <li><strong>Contacts</strong> — deny the Contacts permission in Settings → Privacy &amp; Security → Contacts. You can still enter journey destinations by typing an address.</li>
+  </ul>
+
+  <!-- 6. Children's Privacy -->
+  <h2>Children's Privacy</h2>
+  <p>YouBike Nearby is a general-audience app and is not directed at children under 13. We do not knowingly collect personal information from anyone under 13. If you believe a child has provided personal data through the app, please contact us at the address below.</p>
+
+  <!-- 7. Changes -->
+  <h2>Changes to This Policy</h2>
+  <p>If we make material changes to this policy, we'll update the "Last updated" date at the top of this page. Continued use of the app after a change constitutes acceptance of the updated policy.</p>
+
+  <!-- 8. Contact -->
+  <h2>Contact</h2>
+  <p>Questions about privacy? Email <a href="mailto:billypchan@gmail.com">billypchan@gmail.com</a>.</p>
+</div>
+
+<footer>
+  <p>© 2026 Bill Chan &nbsp;·&nbsp; <a href="/">Home</a> &nbsp;·&nbsp; <a href="/privacy/">Privacy</a> &nbsp;·&nbsp; <a href="https://github.com/billypchan/">GitHub</a></p>
+</footer>
+
+</body>
+</html>
