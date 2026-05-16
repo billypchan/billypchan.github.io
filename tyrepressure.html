@@ -269,6 +269,72 @@
     @supports not (backdrop-filter: blur(12px)) {
       .sticky-result { background: var(--card); }
     }
+
+    .sticky-toggle {
+      display: none;
+      position: absolute;
+      top: 0.4rem;
+      right: 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      padding: 0.25rem 0.4rem;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 540px) {
+      body { padding: 0.75rem 0.85rem 3rem; }
+      header h1 { font-size: 1.35rem; }
+      header p { font-size: 0.88rem; margin-bottom: 1rem; }
+
+      .sticky-result {
+        position: relative;
+        padding: 0.55rem 0.7rem;
+      }
+      .sticky-result h2 {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin: 0 0 0.35rem;
+        font-weight: 600;
+      }
+      .sticky-result .results {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+      .sticky-result .result {
+        padding: 0.4rem 0.4rem;
+        border-radius: 8px;
+      }
+      .sticky-result .result .which { font-size: 0.65rem; }
+      .sticky-result .psi { font-size: 1.45rem; }
+      .sticky-result .psi-unit { font-size: 0.78rem; }
+      .sticky-result .bar { font-size: 0.78rem; margin-top: 0.15rem; }
+      .sticky-result .load { display: none; }
+      .sticky-result #notes { display: none; }
+
+      .sticky-toggle { display: inline-block; }
+      .sticky-result:not(.expanded) .sticky-toggle::before { content: '▾'; }
+      .sticky-result.expanded .sticky-toggle::before { content: '▴'; }
+
+      .sticky-result.expanded { padding: 0.9rem 1rem; }
+      .sticky-result.expanded h2 {
+        font-size: 1.05rem;
+        text-transform: none;
+        letter-spacing: normal;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+      }
+      .sticky-result.expanded .psi { font-size: 2rem; }
+      .sticky-result.expanded .result { padding: 0.85rem 0.5rem; }
+      .sticky-result.expanded .load { display: block; }
+      .sticky-result.expanded #notes { display: block; }
+    }
   </style>
 </head>
 <body>
@@ -279,6 +345,7 @@
     </header>
 
     <section id="resultsCard" class="card sticky-result">
+      <button type="button" class="sticky-toggle" id="stickyToggle" aria-label="Show details" aria-expanded="false"></button>
       <h2>Recommended pressures</h2>
       <div class="results">
         <div class="result">
@@ -612,6 +679,12 @@
       const notesEl = $('notes');
       notesEl.innerHTML = notes.map(n => `<div class="notice">${n}</div>`).join('');
     }
+
+    $('stickyToggle').addEventListener('click', () => {
+      const card = $('resultsCard');
+      const expanded = card.classList.toggle('expanded');
+      $('stickyToggle').setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    });
 
     wireLiveUpdates();
     calculate();
